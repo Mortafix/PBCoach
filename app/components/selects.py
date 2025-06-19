@@ -1,0 +1,42 @@
+import reflex as rx
+from app.database.players import get_all_players
+
+# ---- ITEM RENDER
+
+
+def select_item(item) -> rx.Component:
+    return rx.select.item(item[1], value=item[0])
+
+
+def select_item_full(item) -> rx.Component:
+    return rx.select.item(f"{item[0]} • {item[1]}", value=item[0])
+
+
+def select_item_same(item) -> rx.Component:
+    return rx.select.item(item[0], value=item[0])
+
+
+# ---- SELECTS
+
+
+def player_select(state, placeholder, trigger_params=None, root_params=None):
+    root_params = root_params or dict()
+    trigger_params = trigger_params or dict()
+
+    class PlayerState(state):
+        @rx.var(cache=False)
+        def players(self) -> list[tuple[str, str]]:
+            entries = {
+                str(player.get("id")): f"{player.get('name')} {player.get('surname')}"
+                for player in get_all_players()
+            }
+            return list(entries.items())
+
+    return rx.select.root(
+        rx.select.trigger(placeholder=placeholder, **trigger_params),
+        rx.select.content(
+            rx.select.group(rx.foreach(PlayerState.players, select_item))
+        ),
+        name=placeholder.lower().replace(" ", "_"),
+        **root_params,
+    )

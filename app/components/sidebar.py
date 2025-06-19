@@ -1,0 +1,217 @@
+import reflex as rx
+from app.styles import sidebar_close_width, sidebar_width
+
+
+def sidebar_minimize(state) -> rx.Component:
+    return rx.box(
+        rx.button(
+            rx.icon(rx.cond(state.is_sidebar_open, "chevron-left", "chevron-right")),
+            color_scheme="gray",
+            opacity=0.7,
+            variant="ghost",
+            cursor="pointer",
+            size="1",
+            padding="0.05rem",
+            on_click=state.toggle_sidebar(),
+        ),
+        position="absolute",
+        top=10,
+        right=rx.cond(state.is_sidebar_open, 15, 25),
+        padding=0,
+    )
+
+
+def sidebar_header(state) -> rx.Component:
+    header = rx.vstack(
+        rx.text(state.match_name, size="8"),
+        rx.text("Lunedì 16 Giugno, 20:35", color_scheme="gray"),
+        width="100%",
+        align="center",
+        justify="center",
+        padding="0.35em",
+        spacing="1",
+    )
+    return rx.cond(state.is_sidebar_open, header)
+
+
+def sidebar_menu(state) -> rx.Component:
+    def nav_item(icon, text, href) -> rx.Component:
+        is_active = rx.State.router.page.path.split("/")[-1] == href[1:]
+        return rx.link(
+            rx.hstack(
+                rx.icon(icon, size=22, stroke_width=rx.cond(is_active, 2.5, 2)),
+                rx.text(text, size="5", weight=rx.cond(is_active, "bold", "regular")),
+                align="center",
+            ),
+            href=f"/{state.match_id}{href}",
+            underline="none",
+            color=rx.color("white", 7),
+            padding="0.25em 0.7em",
+            border_radius="1em",
+            opacity=rx.cond(is_active, 1, 0.8),
+            _hover={"bg": rx.color("gray", 5)},
+        )
+
+    def nav_item_icon(icon, href) -> rx.Component:
+        is_active = rx.State.router.page.path.split("/")[-1] == href[1:]
+        return rx.link(
+            rx.icon(icon, size=22, stroke_width=rx.cond(is_active, 2.5, 2)),
+            href=f"/{state.match_id}{href}",
+            underline="none",
+            color=rx.color("white", 7),
+            padding="0.4em 0.4em",
+            border_radius="1em",
+            opacity=rx.cond(is_active, 1, 0.8),
+            _hover={"bg": rx.color("gray", 5)},
+        )
+
+    menu_classic = rx.vstack(
+        nav_item("home", "Riepilogo", "/overview"),
+        nav_item("target", "Esplora i Tiri", "/shots"),
+        nav_item("trophy", "Statistiche Partita", "/game"),
+        nav_item("users", "Statistiche Team", "/team"),
+        spacing="1",
+        width="100%",
+        padding_left="1em",
+    )
+
+    menu_minimize = rx.vstack(
+        nav_item_icon("home", "/overview"),
+        nav_item_icon("target", "/shots"),
+        nav_item_icon("trophy", "/game"),
+        nav_item_icon("users", "/team"),
+        spacing="1",
+        width="100%",
+        align="center",
+        margin_top="1rem",
+    )
+    return rx.cond(state.is_sidebar_open, menu_classic, menu_minimize)
+
+
+def sidebar_menu_players(state) -> rx.Component:
+    def player_item(name, opponent=False, name_display=True) -> rx.Component:
+        return rx.link(
+            rx.hstack(
+                rx.avatar(
+                    name,
+                    radius="full",
+                    fallback=name[:2],
+                    color_scheme=rx.cond(opponent, "tomato", "indigo"),
+                    border="3px solid white",
+                    border_color=rx.cond(
+                        opponent, rx.color("tomato", 6), rx.color("indigo", 6)
+                    ),
+                ),
+                rx.cond(
+                    name_display,
+                    rx.text(name, color_scheme=rx.cond(opponent, "tomato", "indigo")),
+                ),
+                align="center",
+            ),
+            href=f"/{state.match_id}/player/{name}",
+            underline="none",
+            padding=rx.cond(state.is_sidebar_open, "0.4rem 0.8rem", "0.25rem 0.25rem"),
+            border_radius="1em",
+            _hover={"bg": rx.color("gray", 5)},
+        )
+
+    return rx.vstack(
+        rx.cond(
+            state.is_sidebar_open,
+            rx.hstack(
+                rx.text("Statische Giocatori", color_scheme="gray", opacity=0.7),
+                width="100%",
+                justify="center",
+                padding_left="0",
+            ),
+        ),
+        rx.vstack(
+            rx.foreach(
+                state.match_players,
+                lambda el, index: player_item(
+                    el,
+                    opponent=rx.cond(state.match_is_double, index >= 2, index >= 1),
+                    name_display=state.is_sidebar_open,
+                ),
+            ),
+            padding_left=rx.cond(state.is_sidebar_open, "1em", 0),
+            width=rx.cond(state.is_sidebar_open, "auto", "100%"),
+            align=rx.cond(state.is_sidebar_open, "left", "center"),
+            spacing="0",
+        ),
+        spacing="1",
+        width="100%",
+    )
+
+
+def sidebar_footer(state) -> rx.Component:
+    footer_classic = rx.hstack(
+        rx.vstack(
+            rx.button(
+                rx.hstack(rx.text("Condivi la Partita"), rx.icon("share-2", size=18)),
+                align="center",
+                cursor="pointer",
+                variant="soft",
+            ),
+            spacing="1",
+        ),
+        rx.spacer(),
+        rx.color_mode.button(style={"opacity": 0.8, "scale": 0.95}),
+        justify="start",
+        align="end",
+        width="100%",
+        padding="0.35em",
+    )
+    footer_minimize = rx.vstack(
+        rx.button(
+            rx.icon("share-2", size=18),
+            align="center",
+            cursor="pointer",
+            variant="soft",
+        ),
+        rx.color_mode.button(style={"opacity": 0.8, "scale": 0.95}),
+        width="100%",
+        spacing="1",
+        align="center",
+        justify="center",
+    )
+    return rx.cond(state.is_sidebar_open, footer_classic, footer_minimize)
+
+
+def sidebar(state) -> rx.Component:
+    return rx.flex(
+        rx.vstack(
+            sidebar_minimize(state),
+            sidebar_header(state),
+            rx.cond(state.is_sidebar_open, rx.divider()),
+            sidebar_menu(state),
+            rx.divider(),
+            sidebar_menu_players(state),
+            rx.spacer(),
+            sidebar_footer(state),
+            overflow="auto",
+            align="end",
+            width=rx.cond(state.is_sidebar_open, sidebar_width, sidebar_close_width),
+            height="96dvh",
+            padding="1em",
+        ),
+        max_width=rx.cond(state.is_sidebar_open, sidebar_width, sidebar_close_width),
+        # display=["none", "none", "none", "none", "none", "flex"],
+        display=[
+            rx.cond(state.is_sidebar_force_open, "flex", "none"),
+            rx.cond(state.is_sidebar_force_open, "flex", "none"),
+            rx.cond(state.is_sidebar_force_open, "flex", "none"),
+            rx.cond(state.is_sidebar_force_open, "flex", "none"),
+            rx.cond(state.is_sidebar_force_open, "flex", "none"),
+            rx.cond(state.is_sidebar_force_open, "flex", "flex"),
+        ],
+        width="auto",
+        height="100%",
+        position="sticky",
+        justify="end",
+        top="0px",
+        left="0px",
+        flex="1",
+        bg=rx.color("gray", 3),
+        # display=rx.cond(state.is_sidebar_force_open, "unset !important", "none"),
+    )

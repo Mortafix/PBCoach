@@ -12,6 +12,7 @@ class State(rx.State):
 
     # ---- MATCH
     match_name: str = ""
+    match_date_str: str = ""
     match_players: list[str] = []
     match_is_double: bool = True
 

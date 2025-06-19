@@ -1,11 +1,18 @@
 from random import choice
 
 import reflex as rx
+from app.database.connection import DB
 
 
 def code_generator(length=5):
-    letters = "ABCDEFGHIJKLMNOPQRSTUVWYXZ"
-    return "".join(choice(letters) for i in range(length))
+    def generate():
+        letters = "ABCDEFGHIJKLMNOPQRSTUVWYXZ"
+        return "".join(choice(letters) for i in range(length))
+
+    code = generate()
+    while DB.stats.count_documents({"code": code}) > 0:
+        code = generate()
+    return code
 
 
 def page_loading():

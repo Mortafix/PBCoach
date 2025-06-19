@@ -1,11 +1,11 @@
-from json import loads
+from json import dump, loads
 from os import makedirs, path
 from re import match
 
 import reflex as rx
 from app.components.extra import code_generator
 from app.database.players import add_player_to_db
-from app.database.stats import update_match_info, upload_match
+from app.database.stats import create_match
 from app.templates.base import State
 
 
@@ -25,7 +25,7 @@ class UploadState(State):
         self.player_surname = ""
         self.uploaded = False
         self.players_n = 0
-        self.unknowns = [False] * self.players_n
+        self.unknowns = [False] * 4
         self.progress = 0
         self.uploading = False
         return rx.clear_selected_files("upload-form")
@@ -42,7 +42,6 @@ class UploadState(State):
                     "I file devono essere esattamente stats.json e insights.json",
                 )
             self.code = code_generator()
-            stats_data, insights_data = dict(), dict()
             base_client_dir = path.join(rx.get_upload_dir(), self.code)
             if not path.exists(base_client_dir):
                 makedirs(base_client_dir)
@@ -50,16 +49,13 @@ class UploadState(State):
                 filepath = path.join(base_client_dir, file.name)
                 upload_data = await file.read()
                 if "stats" in file.name:
-                    stats_data = {"code": self.code} | loads(upload_data)
+                    data = {"code": self.code} | loads(upload_data)
+                    self.players_n = data.get("session", {}).get("num_players", 4)
                 if "insights" in file.name:
-                    insights_data = {"code": self.code} | loads(upload_data)
-                with open(filepath, "wb") as file_object:
-                    file_object.write(upload_data)
-            if upload_match(stats_data, insights_data):
-                self.players_n = stats_data.get("session", {}).get("num_players", 4)
-                self.uploaded = True
-                return
-            raise Exception("Error in DB")
+                    data = {"code": self.code} | loads(upload_data)
+                dump(data, open(filepath, "w+"))
+            self.uploaded = True
+            return
         except Exception as e:
             raise e
             return rx.toast.error(
@@ -86,21 +82,21 @@ class UploadState(State):
                 return False
             return True
 
-        attrs = ["name", "giocatore_1", "giocatore_3"]
+        attrs = ["name", "date", "time", "giocatore_1", "giocatore_3"]
         if self.players_n == 2:
             if not check_players(attrs, 2):
                 return rx.toast.error(
-                    "Il nome della partita è obbligatorio e i giocatori "
+                    "Le info della partita sono obbligatorie e i giocatori "
                     "devono essere tutti diversi"
                 )
         if self.players_n == 4:
             attrs += ["giocatore_2", "giocatore_4"]
             if not check_players(attrs, 4):
                 return rx.toast.error(
-                    "Il nome della partita è obbligatorio e i giocatori "
+                    "Le info della partita sono obbligatorie e i giocatori "
                     "devono essere tutti diversi"
                 )
-        if update_match_info(self.code, form_data, self.players_n):
+        if create_match(self.code, form_data):
             yield rx.toast.success("Info della partita aggiornate!")
             return rx.redirect(f"/{self.code}/overview")
         return rx.toast.error("Errore durante l'aggiornamento delle info")
@@ -124,6 +120,5 @@ class UploadState(State):
         if add_player_to_db(self.player_name, self.player_surname):
             self.player_name = ""
             self.player_surname = ""
-            self.on_load()
             return rx.toast.success("Giocatore aggiunto!")
         return rx.toast.error("Errore durante l'aggiunta del giocatore")

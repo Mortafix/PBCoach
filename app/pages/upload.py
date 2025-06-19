@@ -28,13 +28,13 @@ def player_selection(player_n):
                 ["Sconosciuto"],
                 value="Sconosciuto",
                 disabled=True,
-                **field_style | {"width": "90%"},
+                **field_style | {"width": "88%"},
             ),
             player_select(
                 UploadState,
                 f"Giocatore {player_n}",
-                field_style | {"width": "90%"},
-                field_style | {"width": "90%"},
+                field_style | {"width": "88%"},
+                field_style | {"width": "88%"},
             ),
         ),
         btn_icon(
@@ -173,11 +173,20 @@ def form_name() -> rx.Component:
                     rx.vstack(
                         std_input(
                             "trophy",
-                            "Nome Partita",
+                            "Nome della Partita",
                             rx.input(
                                 placeholder="Nome della partita",
                                 name="name",
                                 **field_style,
+                            ),
+                        ),
+                        std_input(
+                            "calendar",
+                            "Data della Partita",
+                            rx.hstack(
+                                rx.input(type="date", name="date", **field_style),
+                                rx.input(type="time", name="time", **field_style),
+                                width="100%",
                             ),
                         ),
                         rx.hstack(

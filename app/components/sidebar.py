@@ -23,8 +23,8 @@ def sidebar_minimize(state) -> rx.Component:
 
 def sidebar_header(state) -> rx.Component:
     header = rx.vstack(
-        rx.text(state.match_name, size="8"),
-        rx.text("Lunedì 16 Giugno, 20:35", color_scheme="gray"),
+        rx.text(state.match_name, size="8", align="center"),
+        rx.text(state.match_date_str, color_scheme="gray", align="center"),
         width="100%",
         align="center",
         justify="center",
@@ -128,10 +128,13 @@ def sidebar_menu_players(state) -> rx.Component:
         rx.vstack(
             rx.foreach(
                 state.match_players,
-                lambda el, index: player_item(
+                lambda el, index: rx.cond(
                     el,
-                    opponent=rx.cond(state.match_is_double, index >= 2, index >= 1),
-                    name_display=state.is_sidebar_open,
+                    player_item(
+                        el,
+                        opponent=rx.cond(state.match_is_double, index >= 2, index >= 1),
+                        name_display=state.is_sidebar_open,
+                    ),
                 ),
             ),
             padding_left=rx.cond(state.is_sidebar_open, "1em", 0),
@@ -196,7 +199,6 @@ def sidebar(state) -> rx.Component:
             padding="1em",
         ),
         max_width=rx.cond(state.is_sidebar_open, sidebar_width, sidebar_close_width),
-        # display=["none", "none", "none", "none", "none", "flex"],
         display=[
             rx.cond(state.is_sidebar_force_open, "flex", "none"),
             rx.cond(state.is_sidebar_force_open, "flex", "none"),
@@ -213,5 +215,4 @@ def sidebar(state) -> rx.Component:
         left="0px",
         flex="1",
         bg=rx.color("gray", 3),
-        # display=rx.cond(state.is_sidebar_force_open, "unset !important", "none"),
     )

@@ -20,7 +20,7 @@ def add_player_to_db(name, surname):
 
 def get_player_name(player_id, short=False, only_name=False):
     if player_id < 0:
-        return "Sconosciuto"
+        return f"Sconosciuto {-player_id}"
     player = DB.players.find_one({"id": player_id})
     name, surname = player.get("name"), player.get("surname")
     if only_name:

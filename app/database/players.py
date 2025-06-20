@@ -23,7 +23,7 @@ def get_player_name(player_id, short=False, only_name=False):
         return f"Sconosciuto {-player_id}"
     player = DB.players.find_one({"id": player_id})
     name, surname = player.get("name"), player.get("surname")
-    if only_name:
+    if only_name or not surname:
         return name
     if short:
         return f"{name} {surname[0]}."

@@ -1,6 +1,7 @@
 import reflex as rx
 from app.components.cards import card
-from app.components.extra import page_loading
+from app.components.extra import page_loading, page_title
+from app.database.data import color_quality, shots_name_italian
 from app.states.overview import OverviewState
 from app.templates import template
 
@@ -8,16 +9,7 @@ from app.templates import template
 def player_item(index) -> rx.Component:
     name = OverviewState.match_players[index]
     return rx.hstack(
-        rx.avatar(
-            name,
-            radius="full",
-            fallback=name[:2],
-            # color_scheme=rx.cond(opponent, "tomato", "indigo"),
-            border="3px solid white",
-            # border_color=rx.cond(
-            #     opponent, rx.color("tomato", 6), rx.color("indigo", 6)
-            # ),
-        ),
+        rx.avatar(name, radius="full", fallback=name[:2], border="3px solid white"),
         rx.cond(name, rx.text(name)),
         align="center",
     )
@@ -53,6 +45,36 @@ def achiever_item(title, achiever, description) -> rx.Component:
     )
 
 
+def quality_item(data, player_index):
+    element = rx.vstack(
+        player_item(player_index),
+        rx.progress(
+            value=data[0],
+            size="3",
+            variant="soft",
+            color_scheme=color_quality(data[0]),
+        ),
+        rx.hstack(
+            rx.text("Qualità", color_scheme="gray"),
+            rx.text(f"{data[0]}%", color_scheme=color_quality(data[0])),
+            align="center",
+            justify="between",
+            width="100%",
+        ),
+        rx.hstack(
+            rx.text("Migliore", color_scheme="gray"),
+            rx.badge(shots_name_italian(data[1]), color_scheme="gray", size="3"),
+            align="center",
+            justify="between",
+            width="100%",
+        ),
+        spacing="3",
+        align="center",
+        min_width="20%",
+    )
+    return rx.cond(data[0] > 0, element, None)
+
+
 @template(
     route="/[match_id]/overview",
     title="Home",
@@ -60,6 +82,11 @@ def achiever_item(title, achiever, description) -> rx.Component:
 )
 def home_page() -> rx.Component:
     page = rx.vstack(
+        rx.cond(
+            OverviewState.is_sidebar_open,
+            page_title("medal", "Riepilogo"),
+            page_title("medal", f"Riepilogo • {OverviewState.match_name}"),
+        ),
         card(
             rx.flex(
                 rx.flex(
@@ -108,6 +135,15 @@ def home_page() -> rx.Component:
                 justify="between",
                 width="100%",
                 wrap="wrap",
+            ),
+            width="100%",
+        ),
+        card(
+            rx.hstack(
+                rx.foreach(OverviewState.players_quality, quality_item),
+                align="center",
+                justify="between",
+                width="100%",
             ),
             width="100%",
         ),

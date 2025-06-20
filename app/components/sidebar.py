@@ -66,9 +66,7 @@ def sidebar_menu(state) -> rx.Component:
         )
 
     menu_classic = rx.vstack(
-        nav_item("home", "Riepilogo", "/overview"),
-        nav_item("target", "Esplora i Tiri", "/shots"),
-        nav_item("trophy", "Statistiche Partita", "/game"),
+        nav_item("home", "Riepilogo Partita", "/overview"),
         nav_item("users", "Statistiche Team", "/team"),
         spacing="1",
         width="100%",
@@ -77,8 +75,6 @@ def sidebar_menu(state) -> rx.Component:
 
     menu_minimize = rx.vstack(
         nav_item_icon("home", "/overview"),
-        nav_item_icon("target", "/shots"),
-        nav_item_icon("trophy", "/game"),
         nav_item_icon("users", "/team"),
         spacing="1",
         width="100%",
@@ -89,7 +85,7 @@ def sidebar_menu(state) -> rx.Component:
 
 
 def sidebar_menu_players(state) -> rx.Component:
-    def player_item(name, opponent=False, name_display=True) -> rx.Component:
+    def player_item(name, index, opponent=False, name_display=True) -> rx.Component:
         return rx.link(
             rx.hstack(
                 rx.avatar(
@@ -108,7 +104,7 @@ def sidebar_menu_players(state) -> rx.Component:
                 ),
                 align="center",
             ),
-            href=f"/{state.match_id}/player/{name}",
+            href=f"/{state.match_id}/player/{index}",
             underline="none",
             padding=rx.cond(state.is_sidebar_open, "0.4rem 0.8rem", "0.25rem 0.25rem"),
             border_radius="1em",
@@ -132,6 +128,7 @@ def sidebar_menu_players(state) -> rx.Component:
                     el,
                     player_item(
                         el,
+                        index,
                         opponent=rx.cond(state.match_is_double, index >= 2, index >= 1),
                         name_display=state.is_sidebar_open,
                     ),

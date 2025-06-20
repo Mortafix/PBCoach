@@ -1,17 +1,17 @@
 import reflex as rx
 
 
-def card(content, **attributes) -> rx.Component:
+def card(content, border=0, on_click=None, **attributes) -> rx.Component:
     return rx.card(
         content,
         size="4",
-        border=0,
+        border=border,
         style={"::after": {"box-shadow": "0 0 0 0"}, **attributes},
+        on_click=on_click,
     )
 
 
 base_attributes = {
-    # "box_shadow": styles.box_shadow_style,
     "size": "3",
     "width": "100%",
     "_before": {"background-color": rx.color_mode_cond("#f3f3f3", "#18191b")},

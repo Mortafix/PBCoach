@@ -24,3 +24,17 @@ def page_loading():
         width="100%",
         align="center",
     )
+
+
+def page_title(icon, text):
+    return rx.box(
+        rx.hstack(
+            rx.icon(icon, size=45, stroke_width=1.5),
+            rx.heading(text, size="8"),
+            spacing="4",
+            align="center",
+        ),
+        background_color=rx.color("gray", 4),
+        padding="0.5em 1em",
+        border_radius="0.5em",
+    )

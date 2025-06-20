@@ -2,8 +2,7 @@ import reflex as rx
 from app import styles
 from app.components.header import header
 from app.components.sidebar import sidebar
-from app.pages import (game_stats, overview, player_stats, shot_explorer,
-                       team_stats, upload)
+from app.pages import matches, overview, player_stats, players, team, upload
 
 app = rx.App(
     style=styles.base_style,

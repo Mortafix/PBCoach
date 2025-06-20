@@ -115,8 +115,8 @@ class UploadState(State):
 
     @rx.event
     def add_player(self):
-        if not self.player_name or not self.player_surname:
-            return rx.toast.error("Devi inserire sia nome che cognome")
+        if not self.player_name:
+            return rx.toast.error("Devi inserire almeno il nome")
         if add_player_to_db(self.player_name, self.player_surname):
             self.player_name = ""
             self.player_surname = ""

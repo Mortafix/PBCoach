@@ -2,8 +2,17 @@ import reflex as rx
 from app.components.input import btn_text_icon
 
 
-def header_button(text: str, href: str) -> rx.Component:
-    return rx.button(text, on_click=rx.redirect(href), cursor="pointer")
+def header_button(text: str, icon: str, href: str) -> rx.Component:
+    return rx.button(
+        rx.icon(icon, size=16),
+        rx.text(text, size="4"),
+        align="center",
+        spacing="1",
+        on_click=rx.redirect(href),
+        cursor="pointer",
+        variant="ghost",
+        color=rx.color("black", 9),
+    )
 
 
 def header(state) -> rx.Component:
@@ -12,14 +21,15 @@ def header(state) -> rx.Component:
             rx.icon("bar-chart-big"), rx.text("MPC Coach", size="7"), align="center"
         ),
         rx.hstack(
-            header_button("Partite", "#"),
-            header_button("Giocatori", "#"),
+            header_button("Partite", "medal", "/matches"),
+            header_button("Giocatori", "users", "/players"),
             btn_text_icon(
                 "cloud-upload",
                 "Carica statistiche",
                 variant="soft",
                 on_click=rx.redirect("/upload"),
             ),
+            spacing="5",
             align="center",
         ),
         rx.button(

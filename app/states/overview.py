@@ -26,6 +26,7 @@ class OverviewState(State):
     top_shooter: tuple[int, int] = (0, 0)
     top_finisher: tuple[int, int] = (0, 0)
     wrost_misser: tuple[int, float] = (0, 0)
+    players_quality: list[tuple[int, str]] = []
 
     @rx.event
     def on_load(self):
@@ -36,12 +37,16 @@ class OverviewState(State):
         players_stats = [p or {} for p in self.match_stats.get("players")]
         self.match_name = self.match_stats.get("match_name")
         self.match_date_str = format(
-            self.match_stats.get("match_date"), "%a ⋅ %d %b %Y ⋅ %H:%M"
+            self.match_stats.get("match_date"), "%a • %d %b %Y • %H:%M"
         )
-        self.match_players = [
-            get_player_name(p_id, short=True) if stats else ""
-            for stats, p_id in zip(players_stats, self.match_stats.get("players_ids"))
-        ]
+        self.match_players, counter = [], 0
+        for stat in players_stats:
+            name = ""
+            if stat:
+                player_id = self.match_stats.get("players_ids")[counter]
+                name = get_player_name(player_id, short=True)
+                counter += 1
+            self.match_players.append(name)
         self.players_n = self.match_stats.get("session", {}).get("num_players", 4)
         self.match_is_double = self.players_n == 4
         self.team1_idx = [0, 1] if self.match_is_double else [0]
@@ -65,3 +70,35 @@ class OverviewState(State):
             for pl in players_stats
         ]
         self.wrost_misser = (missers.index(max(missers)), int(max(missers)))
+        self.players_quality = [self.calculate_quality(data) for data in players_stats]
+
+    @rx.event
+    def calculate_quality(self, data):
+        if not data:
+            return 0, ""
+        attributes = [
+            "serves",
+            "returns",
+            "drives",
+            "drops",
+            "dinks",
+            "lobs",
+            "smashes",
+            "third_drives",
+            "third_drops",
+            "third_lobs",
+            "resets",
+            "speedups",
+            "passing",
+            "poaches",
+        ]
+        qualities = {
+            attr: (data.get(attr).get("count"), quality)
+            for attr in attributes
+            if (quality := data.get(attr).get("average_quality"))
+        }
+        total_weight = sum(count for count, _ in qualities.values())
+        weighted_sum = sum(count * perc for count, perc in qualities.values())
+        weighted_mean = weighted_sum / total_weight if total_weight else 0
+        best_shot = sorted(qualities, key=lambda el: qualities.get(el)[1], reverse=True)
+        return int(weighted_mean * 100), best_shot[0]

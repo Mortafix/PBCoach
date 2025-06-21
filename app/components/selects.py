@@ -29,7 +29,7 @@ def player_select(state, placeholder, trigger_params=None, root_params=None):
         def players(self) -> list[tuple[str, str]]:
             entries = {
                 str(player.get("id")): f"{player.get('name')} {player.get('surname')}"
-                for player in get_all_players()
+                for player in get_all_players(sort=[("name", 1)])
             }
             return list(entries.items())
 
@@ -52,7 +52,7 @@ def location_select(state, trigger_params=None, root_params=None):
         def locations(self) -> list[tuple[str, str]]:
             entries = {
                 str(location.get("id")): location.get("name")
-                for location in get_all_locations()
+                for location in get_all_locations(sort=[("name", 1)])
             }
             return list(entries.items())
 

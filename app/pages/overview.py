@@ -193,7 +193,7 @@ def home_page() -> rx.Component:
                 achiever_item(
                     "SARÀ PER LA PROSSIMA",
                     OverviewState.wrost_misser,
-                    "% colpi sbagliati",
+                    "% errori",
                 ),
                 align="center",
                 justify_content=["center", "center", "center", "space-between"],

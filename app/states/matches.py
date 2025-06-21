@@ -12,4 +12,4 @@ class MatchesState(State):
 
     @rx.event
     def on_load(self):
-        self.matches = get_all_matches()
+        self.matches = get_all_matches(sort=[("info.date", 1)])

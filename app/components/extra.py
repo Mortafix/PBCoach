@@ -38,3 +38,14 @@ def page_title(icon, text):
         padding="0.5em 1em",
         border_radius="0.5em",
     )
+
+
+def form_divider(icon, title):
+    return rx.hstack(
+        rx.divider(),
+        rx.icon(icon, size=45),
+        rx.text(title, size="6"),
+        rx.divider(),
+        align="center",
+        width="100%",
+    )

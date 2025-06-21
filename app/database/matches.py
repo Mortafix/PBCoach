@@ -10,28 +10,43 @@ class Partita(rx.Base):
     name: str
     date: datetime
     date_str: str
+    date_str_short: str
+    location: str
+    location_type: str
+    match_type: str
+    weather: str | None = None
     players: list[str]
+    players_full: list[str]
     players_n: int
     score: tuple[int, int]
     team1_idx: list[int]
     team2_idx: list[int]
     win_team1: bool
+    is_double: bool = True
 
 
 def parse_model(data):
-    players_n = len(data.get("players_ids"))
+    players = [get_player_name(p_id, short=True) for p_id in data.get("players_ids")]
+    players_n = len(players)
     score = data.get("game", {}).get("game_outcome")
     return Partita(
         code=data.get("code"),
-        name=data.get("match_name"),
-        date=data.get("match_date"),
-        date_str=format(data.get("match_date"), "%A • %d %B %y • %H:%M"),
-        players=[get_player_name(p_id, short=True) for p_id in data.get("players_ids")],
+        name=data.get("info").get("name"),
+        date=data.get("info").get("date"),
+        date_str=format(data.get("info").get("date"), "%A • %d %B %y • %H:%M"),
+        date_str_short=format(data.get("info").get("date"), "%a • %d %b %y • %H:%M"),
+        location=data.get("info").get("location"),
+        location_type=data.get("info").get("location-type"),
+        match_type=data.get("info").get("type"),
+        weather=data.get("info").get("weather"),
+        players=players,
+        players_full=players if players_n == 4 else [players[0], "", players[1], ""],
         players_n=players_n,
         score=score,
         team1_idx=[0, 1] if players_n == 4 else [0],
         team2_idx=[2, 3] if players_n == 4 else [1],
         win_team1=score[0] > score[1],
+        is_double=players_n == 4,
     )
 
 

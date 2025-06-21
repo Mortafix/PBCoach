@@ -7,4 +7,4 @@ class PlayerState(OverviewState):
 
     @rx.event
     def on_load(self):
-        self.player_name = self.match_players[int(self.player_id)]
+        self.player_name = self.match.players[int(self.player_id)]

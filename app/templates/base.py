@@ -1,4 +1,5 @@
 import reflex as rx
+from app.database.matches import Partita
 
 
 class State(rx.State):
@@ -11,10 +12,7 @@ class State(rx.State):
     previous_page: str = "/"
 
     # ---- MATCH
-    match_name: str = ""
-    match_date_str: str = ""
-    match_players: list[str] = []
-    match_is_double: bool = True
+    match: Partita | None = ""
 
     # ---- VARS
 
@@ -32,9 +30,7 @@ class State(rx.State):
             self.current_page = self.current_url
         self.is_sidebar_force_open = False
         self.is_in_match = False
-        self.match_name = ""
-        self.match_players = []
-        self.match_is_double = True
+        self.match = None
 
     @rx.event
     def toggle_sidebar(self):

@@ -6,8 +6,12 @@ from app.states.overview import OverviewState
 from app.templates import template
 
 
-def player_item(index) -> rx.Component:
-    name = OverviewState.match_players[index]
+def player_item(index, full_index=True) -> rx.Component:
+    name = rx.cond(
+        full_index,
+        OverviewState.match.players_full[index],
+        OverviewState.match.players[index],
+    )
     return rx.hstack(
         rx.avatar(name, radius="full", fallback=name[:2], border="3px solid white"),
         rx.cond(name, rx.text(name)),
@@ -85,33 +89,33 @@ def home_page() -> rx.Component:
         rx.cond(
             OverviewState.is_sidebar_open,
             page_title("medal", "Riepilogo"),
-            page_title("medal", f"Riepilogo • {OverviewState.match_name}"),
+            page_title("medal", f"Riepilogo • {OverviewState.match.name}"),
         ),
         card(
             rx.flex(
                 rx.flex(
-                    rx.foreach(OverviewState.team1_idx, player_item),
+                    rx.foreach(OverviewState.match.team1_idx, player_item),
                     align="center",
                     spacing="3",
                     flex_direction=["row", "row", "column"],
                 ),
                 rx.hstack(
                     rx.cond(
-                        OverviewState.win_team1,
+                        OverviewState.match.win_team1,
                         rx.icon("trophy", size=30, color=rx.color("amber", 9)),
                     ),
-                    rx.text(OverviewState.score[0], size="9", weigth="bold"),
+                    rx.text(OverviewState.match.score[0], size="9", weigth="bold"),
                     rx.text("-", size="8", weigth="bold", opacity=0.5),
-                    rx.text(OverviewState.score[1], size="9", weigth="bold"),
+                    rx.text(OverviewState.match.score[1], size="9", weigth="bold"),
                     rx.cond(
-                        ~OverviewState.win_team1,
+                        ~OverviewState.match.win_team1,
                         rx.icon("trophy", size=30, color=rx.color("amber", 9)),
                     ),
                     spacing="3",
                     align="center",
                 ),
                 rx.flex(
-                    rx.foreach(OverviewState.team2_idx, player_item),
+                    rx.foreach(OverviewState.match.team2_idx, player_item),
                     align="center",
                     spacing="3",
                     flex_direction=["row", "row", "column"],
@@ -171,4 +175,4 @@ def home_page() -> rx.Component:
         spacing="5",
         width="100%",
     )
-    return rx.cond(OverviewState.match_players, page, page_loading())
+    return rx.cond(OverviewState.match, page, page_loading())

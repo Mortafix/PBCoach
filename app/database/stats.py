@@ -14,8 +14,12 @@ def get_match_insights(code):
     return DB.insights.find_one({"code": code})
 
 
-def create_match(code, match_data):
-    players = [int(match_data.get(f"giocatore_{i+1}", -1)) for i in range(4)]
+def create_match(code, match_data, players_n):
+    players = [
+        int(match_data.get(f"giocatore_{i+1}", -1))
+        for i in range(4)
+        if players_n == 4 or i in [0, 2]
+    ]
     unknown_idx = 1
     for i, player in enumerate(players):
         if player < 0:
@@ -25,10 +29,16 @@ def create_match(code, match_data):
     base_client_dir = path.join(rx.get_upload_dir(), code)
     stats_data = load(open(path.join(base_client_dir, "stats.json")))
     stats_data |= {
-        "match_name": match_data.get("name"),
-        "match_date": datetime.fromisoformat(
-            f"{match_data.get('date')}T{match_data.get('time')}"
-        ),
+        "info": {
+            "name": match_data.get("name"),
+            "date": datetime.fromisoformat(
+                f"{match_data.get('date')}T{match_data.get('time')}"
+            ),
+            "type": match_data.get("match-type"),
+            "location": int(match_data.get("location")),
+            "location-type": match_data.get("location-type"),
+            "weather": match_data.get("weather"),
+        },
         "players_ids": players,
     }
     insights_data = load(open(path.join(base_client_dir, "insights.json")))

@@ -17,11 +17,11 @@ def team_page() -> rx.Component:
             page_title("user", f"Statisiche di {PlayerState.player_name}"),
             page_title(
                 "user",
-                f"Statisiche di {PlayerState.player_name} • {PlayerState.match_name}",
+                f"Statisiche di {PlayerState.player_name} • {PlayerState.match.name}",
             ),
         ),
         rx.badge(rx.text("Coming soon!", size="4"), size="3"),
         spacing="5",
         width="100%",
     )
-    return rx.cond(PlayerState.match_players, page, page_loading())
+    return rx.cond(PlayerState.match, page, page_loading())

@@ -23,8 +23,8 @@ def sidebar_minimize(state) -> rx.Component:
 
 def sidebar_header(state) -> rx.Component:
     header = rx.vstack(
-        rx.text(state.match_name, size="8", align="center"),
-        rx.text(state.match_date_str, color_scheme="gray", align="center"),
+        rx.text(state.match.name, size="8", align="center"),
+        rx.text(state.match.date_str, color_scheme="gray", align="center"),
         width="100%",
         align="center",
         justify="center",
@@ -123,13 +123,13 @@ def sidebar_menu_players(state) -> rx.Component:
         ),
         rx.vstack(
             rx.foreach(
-                state.match_players,
+                state.match.players,
                 lambda el, index: rx.cond(
                     el,
                     player_item(
                         el,
                         index,
-                        opponent=rx.cond(state.match_is_double, index >= 2, index >= 1),
+                        opponent=rx.cond(state.match.is_double, index >= 2, index >= 1),
                         name_display=state.is_sidebar_open,
                     ),
                 ),

@@ -1,4 +1,5 @@
 import reflex as rx
+from app.database.locations import get_all_locations
 from app.database.players import get_all_players
 
 # ---- ITEM RENDER
@@ -38,5 +39,28 @@ def player_select(state, placeholder, trigger_params=None, root_params=None):
             rx.select.group(rx.foreach(PlayerState.players, select_item))
         ),
         name=placeholder.lower().replace(" ", "_"),
+        **root_params,
+    )
+
+
+def location_select(state, trigger_params=None, root_params=None):
+    root_params = root_params or dict()
+    trigger_params = trigger_params or dict()
+
+    class LocationState(state):
+        @rx.var(cache=False)
+        def locations(self) -> list[tuple[str, str]]:
+            entries = {
+                str(location.get("id")): location.get("name")
+                for location in get_all_locations()
+            }
+            return list(entries.items())
+
+    return rx.select.root(
+        rx.select.trigger(placeholder="Campo di gioco", **trigger_params),
+        rx.select.content(
+            rx.select.group(rx.foreach(LocationState.locations, select_item))
+        ),
+        name="location",
         **root_params,
     )

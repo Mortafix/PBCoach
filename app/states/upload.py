@@ -4,6 +4,7 @@ from re import match
 
 import reflex as rx
 from app.components.extra import code_generator
+from app.database.locations import add_location_to_db
 from app.database.players import add_player_to_db
 from app.database.stats import create_match
 from app.templates.base import State
@@ -18,6 +19,8 @@ class UploadState(State):
     player_name: str = ""
     player_surname: str = ""
     unknowns: list[bool] = []
+    location_type: str = ""
+    location_name: str = ""
 
     @rx.event
     def on_load(self):
@@ -28,6 +31,8 @@ class UploadState(State):
         self.unknowns = [False] * 4
         self.progress = 0
         self.uploading = False
+        self.location_name: str = ""
+        self.location_type = ""
         return rx.clear_selected_files("upload-form")
 
     @rx.event
@@ -82,7 +87,10 @@ class UploadState(State):
                 return False
             return True
 
-        attrs = ["name", "date", "time", "giocatore_1", "giocatore_3"]
+        base_attrs = ["name", "date", "time", "match-type", "location", "location-type"]
+        if form_data.get("location-type") == "Outdoor":
+            base_attrs += ["weather"]
+        attrs = base_attrs + ["giocatore_1", "giocatore_3"]
         if self.players_n == 2:
             if not check_players(attrs, 2):
                 return rx.toast.error(
@@ -96,7 +104,7 @@ class UploadState(State):
                     "Le info della partita sono obbligatorie e i giocatori "
                     "devono essere tutti diversi"
                 )
-        if create_match(self.code, form_data):
+        if create_match(self.code, form_data, self.players_n):
             yield rx.toast.success("Info della partita aggiornate!")
             return rx.redirect(f"/{self.code}/overview")
         return rx.toast.error("Errore durante l'aggiornamento delle info")
@@ -114,6 +122,14 @@ class UploadState(State):
         self.player_surname = value
 
     @rx.event
+    def set_location_type(self, value):
+        self.location_type = value
+
+    @rx.event
+    def set_location_name(self, value):
+        self.location_name = value
+
+    @rx.event
     def add_player(self):
         if not self.player_name:
             return rx.toast.error("Devi inserire almeno il nome")
@@ -122,3 +138,12 @@ class UploadState(State):
             self.player_surname = ""
             return rx.toast.success("Giocatore aggiunto!")
         return rx.toast.error("Errore durante l'aggiunta del giocatore")
+
+    @rx.event
+    def add_location(self):
+        if not self.location_name:
+            return rx.toast.error("Devi inserire almeno il nome")
+        if add_location_to_db(self.location_name):
+            self.location_name = ""
+            return rx.toast.success("Location aggiunto!")
+        return rx.toast.error("Errore durante l'aggiunta della location")

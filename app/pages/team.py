@@ -15,10 +15,10 @@ def team_page() -> rx.Component:
         rx.cond(
             TeamState.is_sidebar_open,
             page_title("users", "Statisiche del Team"),
-            page_title("users", f"Statisiche del Team • {TeamState.match_name}"),
+            page_title("users", f"Statisiche del Team • {TeamState.match.name}"),
         ),
         rx.badge(rx.text("Coming soon!", size="4"), size="3"),
         spacing="5",
         width="100%",
     )
-    return rx.cond(TeamState.match_players, page, page_loading())
+    return rx.cond(TeamState.match, page, page_loading())

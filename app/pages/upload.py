@@ -1,8 +1,9 @@
 import reflex as rx
 from app.components.cards import form_card
+from app.components.extra import form_divider
 from app.components.input import (btn_icon, btn_text_icon, field_style,
                                   form_header, std_input)
-from app.components.selects import player_select
+from app.components.selects import location_select, player_select
 from app.states.upload import UploadState
 from app.templates import template
 
@@ -38,13 +39,118 @@ def player_selection(player_n):
             ),
         ),
         btn_icon(
-            rx.cond(UploadState.unknowns[player_n - 1], "user-plus", "user-x"),
+            rx.cond(UploadState.unknowns[player_n - 1], "user-search", "user-x"),
             on_click=lambda: UploadState.toggle_player(player_n - 1),
             type="button",
             variant="soft",
         ),
         align="center",
         width="100%",
+    )
+
+
+def add_player_dialog(trigger) -> rx.Component:
+    return rx.alert_dialog.root(
+        rx.alert_dialog.trigger(trigger),
+        rx.alert_dialog.content(
+            rx.alert_dialog.title("Aggiungi un giocatore al portale"),
+            rx.form(
+                rx.flex(
+                    rx.input(
+                        placeholder="Nome del giocatoere",
+                        name="name",
+                        required=True,
+                        value=UploadState.player_name,
+                        on_change=UploadState.set_player_name,
+                        **field_style,
+                    ),
+                    rx.input(
+                        placeholder="Cognome del giocatore (opzionale)",
+                        name="surname",
+                        value=UploadState.player_surname,
+                        on_change=UploadState.set_player_surname,
+                        **field_style,
+                    ),
+                    rx.hstack(
+                        rx.alert_dialog.cancel(
+                            rx.button(
+                                "Chiudi",
+                                variant="soft",
+                                color_scheme="gray",
+                                width="50%",
+                                cursor="pointer",
+                            ),
+                        ),
+                        rx.alert_dialog.action(
+                            rx.button(
+                                "Aggiungi",
+                                variant="solid",
+                                width="100%",
+                                cursor="pointer",
+                                type="button",
+                                on_click=UploadState.add_player,
+                            ),
+                            width="50%",
+                        ),
+                        width="100%",
+                        spacing="3",
+                        margin_top="1em",
+                    ),
+                    direction="column",
+                    spacing="4",
+                ),
+                reset_on_submit=False,
+            ),
+        ),
+    )
+
+
+def add_location_dialog(trigger) -> rx.Component:
+    return rx.alert_dialog.root(
+        rx.alert_dialog.trigger(trigger),
+        rx.alert_dialog.content(
+            rx.alert_dialog.title("Aggiungi una location di gioco al portale"),
+            rx.form(
+                rx.flex(
+                    rx.input(
+                        placeholder="Nome della location",
+                        name="name",
+                        required=True,
+                        value=UploadState.location_name,
+                        on_change=UploadState.set_location_name,
+                        **field_style,
+                    ),
+                    rx.hstack(
+                        rx.alert_dialog.cancel(
+                            rx.button(
+                                "Chiudi",
+                                variant="soft",
+                                color_scheme="gray",
+                                width="50%",
+                                cursor="pointer",
+                            ),
+                        ),
+                        rx.alert_dialog.action(
+                            rx.button(
+                                "Aggiungi",
+                                variant="solid",
+                                width="100%",
+                                cursor="pointer",
+                                type="button",
+                                on_click=UploadState.add_location,
+                            ),
+                            width="50%",
+                        ),
+                        width="100%",
+                        spacing="3",
+                        margin_top="1em",
+                    ),
+                    direction="column",
+                    spacing="4",
+                ),
+                reset_on_submit=False,
+            ),
+        ),
     )
 
 
@@ -162,9 +268,9 @@ def form_name() -> rx.Component:
                     "chart-pie",
                     "Upload delle statistiche",
                     (
-                        "Aggiorni i dati della partita con ",
-                        rx.code("nome"),
-                        " e ",
+                        "Inserisci le ",
+                        rx.code("info"),
+                        " della partita e i nomi dei ",
                         rx.code("giocatori"),
                     ),
                 ),
@@ -174,10 +280,27 @@ def form_name() -> rx.Component:
                         std_input(
                             "trophy",
                             "Nome della Partita",
-                            rx.input(
-                                placeholder="Nome della partita",
-                                name="name",
-                                **field_style,
+                            rx.hstack(
+                                rx.input(
+                                    placeholder="Nome della partita",
+                                    name="name",
+                                    **field_style | {"width": "70%"},
+                                ),
+                                rx.select(
+                                    [
+                                        "Allenamento",
+                                        "Amichevole",
+                                        "Torneo for fun",
+                                        "Torneo 3.5",
+                                        "Torneo 4.0",
+                                        "Torneo open",
+                                        "Torneo agonistico",
+                                    ],
+                                    placeholder="Tipo di partita",
+                                    name="match-type",
+                                    **field_style | {"width": "30%"},
+                                ),
+                                width="100%",
                             ),
                         ),
                         std_input(
@@ -188,6 +311,61 @@ def form_name() -> rx.Component:
                                 rx.input(type="time", name="time", **field_style),
                                 width="100%",
                             ),
+                        ),
+                        std_input(
+                            "map-pinned",
+                            "Luogo",
+                            rx.hstack(
+                                location_select(
+                                    UploadState,
+                                    field_style | {"width": "70%"},
+                                    field_style | {"width": "70%"},
+                                ),
+                                rx.select(
+                                    ["Indoor", "Outdoor"],
+                                    placeholder="Tipo di campo",
+                                    name="location-type",
+                                    value=UploadState.location_type,
+                                    on_change=UploadState.set_location_type,
+                                    **field_style | {"width": "23%"},
+                                ),
+                                add_location_dialog(
+                                    rx.button(
+                                        rx.icon("map-pin-plus"),
+                                        cursor="pointer",
+                                        width="5%",
+                                    )
+                                ),
+                                align="center",
+                                width="100%",
+                            ),
+                        ),
+                        rx.cond(
+                            UploadState.location_type == "Outdoor",
+                            std_input(
+                                "cloud-sun",
+                                "Meteo",
+                                rx.select(
+                                    [
+                                        "Soleggiato",
+                                        "Nuvoloso",
+                                        "Ventoso",
+                                        "Caldo",
+                                        "Freddo",
+                                    ],
+                                    placeholder="Meteo della giornata",
+                                    name="weather",
+                                    **field_style,
+                                ),
+                            ),
+                        ),
+                        form_divider("users", "Squadre"),
+                        rx.hstack(
+                            rx.text("Se non trovi un ", rx.code("giocatore"), ":"),
+                            add_player_dialog(
+                                rx.button("Aggiungi giocatore", cursor="pointer")
+                            ),
+                            align="center",
                         ),
                         rx.hstack(
                             std_input(
@@ -223,34 +401,6 @@ def form_name() -> rx.Component:
                             "Inserisci dati",
                             type="submit",
                             **field_style,
-                        ),
-                        rx.divider(),
-                        rx.text(
-                            "Se ",
-                            rx.text.strong("non"),
-                            " trovi il giocatore, aggiungilo",
-                        ),
-                        rx.hstack(
-                            rx.input(
-                                placeholder="Nome del Giocatore",
-                                value=UploadState.player_name,
-                                on_change=UploadState.set_player_name,
-                                **field_style,
-                            ),
-                            rx.input(
-                                placeholder="Cognome del giocatore",
-                                value=UploadState.player_surname,
-                                on_change=UploadState.set_player_surname,
-                                **field_style,
-                            ),
-                            btn_icon(
-                                "circle-plus",
-                                on_click=UploadState.add_player,
-                                type="button",
-                                variant="soft",
-                            ),
-                            width="100%",
-                            align="center",
                         ),
                         spacing="5",
                         align="center",

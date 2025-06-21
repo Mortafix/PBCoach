@@ -19,6 +19,14 @@ def player_item(index, full_index=True) -> rx.Component:
     )
 
 
+def info_item(name, icon, value) -> rx.Component:
+    return rx.vstack(
+        rx.hstack(rx.icon(icon), rx.text(name), align="center", opacity=0.75),
+        rx.text(value, size="8"),
+        align="center",
+    )
+
+
 def stat_item(name, icon, value) -> rx.Component:
     return rx.vstack(
         rx.hstack(rx.icon(icon), rx.text(name), align="center", opacity=0.75),
@@ -50,6 +58,15 @@ def achiever_item(title, achiever, description) -> rx.Component:
 
 
 def quality_item(data, player_index):
+    def quality_element(text, value):
+        return rx.hstack(
+            rx.text(text, color_scheme="gray"),
+            value,
+            align="center",
+            justify="between",
+            width="100%",
+        )
+
     element = rx.vstack(
         player_item(player_index),
         rx.progress(
@@ -58,21 +75,19 @@ def quality_item(data, player_index):
             variant="soft",
             color_scheme=color_quality(data[0]),
         ),
-        rx.hstack(
-            rx.text("Qualità", color_scheme="gray"),
-            rx.text(f"{data[0]}%", color_scheme=color_quality(data[0])),
-            align="center",
-            justify="between",
-            width="100%",
+        quality_element(
+            "Qualità",
+            rx.badge(f"{data[0]}%", color_scheme=color_quality(data[0]), size="3"),
         ),
-        rx.hstack(
-            rx.text("Migliore", color_scheme="gray"),
+        quality_element(
+            "Migliore",
+            rx.badge(shots_name_italian(data[2]), color_scheme="gray", size="3"),
+        ),
+        quality_element(
+            "Peggiore",
             rx.badge(shots_name_italian(data[1]), color_scheme="gray", size="3"),
-            align="center",
-            justify="between",
-            width="100%",
         ),
-        spacing="3",
+        spacing="2",
         align="center",
         min_width="20%",
     )
@@ -125,6 +140,22 @@ def home_page() -> rx.Component:
                 width="100%",
                 align="center",
                 justify="between",
+                wrap="wrap",
+            ),
+            width="100%",
+        ),
+        card(
+            rx.hstack(
+                info_item("Tipo", "biceps-flexed", OverviewState.match.type),
+                info_item("Location", "map-pin", OverviewState.match.location),
+                info_item("Campo", "warehouse", OverviewState.match.location_type),
+                rx.cond(
+                    OverviewState.match.location_type == "Outdoor",
+                    info_item("Meteo", "cloud-sun", OverviewState.match.weather),
+                ),
+                align="center",
+                justify="between",
+                width="100%",
                 wrap="wrap",
             ),
             width="100%",

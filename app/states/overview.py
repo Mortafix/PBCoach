@@ -80,5 +80,5 @@ class OverviewState(State):
         total_weight = sum(count for count, _ in qualities.values())
         weighted_sum = sum(count * perc for count, perc in qualities.values())
         weighted_mean = weighted_sum / total_weight if total_weight else 0
-        best_shot = sorted(qualities, key=lambda el: qualities.get(el)[1], reverse=True)
-        return int(weighted_mean * 100), best_shot[0]
+        shots_ql = sorted(qualities, key=lambda el: qualities.get(el)[1])
+        return int(weighted_mean * 100), shots_ql[0], shots_ql[-1]

@@ -20,6 +20,19 @@ def match_item(partita: Partita):
         rx.vstack(
             rx.text(partita.name, size="8", weight="bold", align="center"),
             rx.text(partita.date_str, color_scheme="gray", align="center"),
+            rx.hstack(
+                rx.badge(partita.type, color_scheme="gray"),
+                rx.badge(partita.location, color_scheme="gray"),
+                rx.badge(partita.location_type, color_scheme="gray"),
+                rx.cond(
+                    partita.location_type == "Outdoor",
+                    rx.badge(partita.weather, color_scheme="gray"),
+                ),
+                align="center",
+                justify="center",
+                width="100%",
+                wrap="wrap",
+            ),
             rx.divider(),
             rx.hstack(
                 rx.foreach(partita.team1_idx, player_item),

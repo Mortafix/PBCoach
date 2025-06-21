@@ -2,6 +2,7 @@ from datetime import datetime
 
 import reflex as rx
 from app.database.connection import DB
+from app.database.locations import get_location_name
 from app.database.players import get_player_name
 
 
@@ -13,7 +14,7 @@ class Partita(rx.Base):
     date_str_short: str
     location: str
     location_type: str
-    match_type: str
+    type: str
     weather: str | None = None
     players: list[str]
     players_full: list[str]
@@ -35,9 +36,9 @@ def parse_model(data):
         date=data.get("info").get("date"),
         date_str=format(data.get("info").get("date"), "%A • %d %B %y • %H:%M"),
         date_str_short=format(data.get("info").get("date"), "%a • %d %b %y • %H:%M"),
-        location=data.get("info").get("location"),
+        location=get_location_name(data.get("info").get("location")),
         location_type=data.get("info").get("location-type"),
-        match_type=data.get("info").get("type"),
+        type=data.get("info").get("type"),
         weather=data.get("info").get("weather"),
         players=players,
         players_full=players if players_n == 4 else [players[0], "", players[1], ""],

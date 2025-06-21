@@ -29,6 +29,7 @@ class State(rx.State):
             self.previous_page = self.current_page
             self.current_page = self.current_url
         self.is_sidebar_force_open = False
+        self.is_sidebar_open = False
         self.is_in_match = False
         self.match = None
 

@@ -26,6 +26,7 @@ class OverviewState(State):
 
     @rx.event
     def on_load(self):
+        self.is_sidebar_open = True
         self.is_in_match = True
         self.match_stats = get_match_stats(self.match_id)
         self.match_insights = get_match_insights(self.match_id)

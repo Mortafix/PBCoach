@@ -33,3 +33,7 @@ def shots_name_italian(shot):
         ("fifths", "Quinto colpo"),
         "Sconosciuto",
     )
+
+
+def mph_to_kph(value):
+    return value * 0.3048

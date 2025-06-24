@@ -1,11 +1,11 @@
 import reflex as rx
 
 
-def color_quality(value):
+def color_quality(value, scale=[59.5, 72.5, 84.5]):
     return rx.cond(
-        value >= 85,
+        value > scale[2],
         "green",
-        rx.cond(value > 72.5, "amber", rx.cond(value >= 60, "orange", "red")),
+        rx.cond(value > scale[1], "amber", rx.cond(value > scale[0], "orange", "red")),
     )
 
 
@@ -35,5 +35,5 @@ def shots_name_italian(shot):
     )
 
 
-def mph_to_kph(value):
-    return value * 0.3048
+def to_metric(imperial_value):
+    return imperial_value * 0.3048

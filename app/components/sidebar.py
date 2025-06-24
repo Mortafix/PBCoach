@@ -85,7 +85,7 @@ def sidebar_menu(state) -> rx.Component:
 
 
 def sidebar_menu_players(state) -> rx.Component:
-    def player_item(name, index, opponent=False, name_display=True) -> rx.Component:
+    def player_sidebar_item(name, idx, opponent=False, show_name=True) -> rx.Component:
         return rx.link(
             rx.hstack(
                 rx.avatar(
@@ -99,12 +99,12 @@ def sidebar_menu_players(state) -> rx.Component:
                     ),
                 ),
                 rx.cond(
-                    name_display,
+                    show_name,
                     rx.text(name, color_scheme=rx.cond(opponent, "tomato", "indigo")),
                 ),
                 align="center",
             ),
-            href=f"/{state.match_id}/player/{index}",
+            href=f"/{state.match_id}/player/{idx}",
             underline="none",
             padding=rx.cond(state.is_sidebar_open, "0.4rem 0.8rem", "0.25rem 0.25rem"),
             border_radius="1em",
@@ -124,13 +124,13 @@ def sidebar_menu_players(state) -> rx.Component:
         rx.vstack(
             rx.foreach(
                 state.match.players,
-                lambda el, index: rx.cond(
+                lambda el, idx: rx.cond(
                     el,
-                    player_item(
+                    player_sidebar_item(
                         el,
-                        index,
-                        opponent=rx.cond(state.match.is_double, index >= 2, index >= 1),
-                        name_display=state.is_sidebar_open,
+                        idx,
+                        opponent=rx.cond(state.match.is_double, idx >= 2, idx >= 1),
+                        show_name=state.is_sidebar_open,
                     ),
                 ),
             ),

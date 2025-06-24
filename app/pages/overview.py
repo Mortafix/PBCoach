@@ -1,22 +1,16 @@
 import reflex as rx
 from app.components.cards import card
 from app.components.extra import page_loading, page_title
+from app.components.player import player_item
 from app.database.data import color_quality, shots_name_italian
 from app.states.overview import OverviewState
 from app.templates import template
 
 
-def player_item(index, full_index=True) -> rx.Component:
-    name = rx.cond(
-        full_index,
-        OverviewState.match.players_full[index],
-        OverviewState.match.players[index],
-    )
-    return rx.hstack(
-        rx.avatar(name, radius="full", fallback=name[:2], border="3px solid white"),
-        rx.cond(name, rx.text(name)),
-        align="center",
-    )
+def player_elem(index, full_index=True) -> rx.Component:
+    name = OverviewState.match.players[index]
+    player_id = OverviewState.match.players_ids[index]
+    return player_item(player_id, name)
 
 
 def info_item(name, icon, value) -> rx.Component:
@@ -45,7 +39,7 @@ def achiever_item(title, achiever, description) -> rx.Component:
             high_contrast=True,
             size="3",
         ),
-        player_item(player_idx),
+        player_elem(player_idx),
         rx.hstack(
             rx.text(value, size="8"),
             rx.text(description, color_scheme="gray"),
@@ -68,7 +62,7 @@ def quality_item(data, player_index):
         )
 
     element = rx.vstack(
-        player_item(player_index),
+        player_elem(player_index),
         rx.progress(
             value=data[0],
             size="3",
@@ -109,7 +103,7 @@ def home_page() -> rx.Component:
         card(
             rx.flex(
                 rx.flex(
-                    rx.foreach(OverviewState.match.team1_idx, player_item),
+                    rx.foreach(OverviewState.match.team1_idx, player_elem),
                     align="center",
                     spacing="3",
                     flex_direction=["row", "row", "column"],
@@ -130,7 +124,7 @@ def home_page() -> rx.Component:
                     align="center",
                 ),
                 rx.flex(
-                    rx.foreach(OverviewState.match.team2_idx, player_item),
+                    rx.foreach(OverviewState.match.team2_idx, player_elem),
                     align="center",
                     spacing="3",
                     flex_direction=["row", "row", "column"],

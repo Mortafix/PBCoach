@@ -1,7 +1,7 @@
 from locale import LC_TIME, setlocale
 
 import reflex as rx
-from app.database.data import mph_to_kph
+from app.database.data import to_metric
 from app.database.matches import parse_model
 from app.database.stats import get_match_insights, get_match_stats
 from app.templates.base import State
@@ -39,7 +39,7 @@ class OverviewState(State):
         self.rally_longest = game.get("longest_rally").get("num_shots")
         players_stats = [p or {} for p in self.match_stats.get("players")]
         runners = [pl.get("total_distance_covered", 0) for pl in players_stats]
-        self.top_runner = (runners.index(max(runners)), mph_to_kph(int(max(runners))))
+        self.top_runner = (runners.index(max(runners)), int(to_metric(max(runners))))
         qualities = [pl.get("average_shot_quality", 0) for pl in players_stats]
         self.top_quality = (qualities.index(max(qualities)), int(max(qualities) * 100))
         shooters = [pl.get("shot_count", 0) for pl in players_stats]

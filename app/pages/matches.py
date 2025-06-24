@@ -1,20 +1,17 @@
 import reflex as rx
 from app.components.cards import card
 from app.components.extra import page_title
+from app.components.player import player_item
 from app.database.matches import Partita
 from app.states.matches import MatchesState
 from app.templates import template
 
 
 def match_item(partita: Partita):
-    def player_item(index) -> rx.Component:
+    def player_elem(index) -> rx.Component:
         name = partita.players[index]
-        return rx.hstack(
-            rx.avatar(name, radius="full", fallback=name[:2], border="3px solid white"),
-            rx.cond(name, rx.text(name)),
-            spacing="2",
-            align="center",
-        )
+        player_id = partita.players_ids[index]
+        return player_item(player_id, name)
 
     return card(
         rx.vstack(
@@ -35,7 +32,7 @@ def match_item(partita: Partita):
             ),
             rx.divider(),
             rx.hstack(
-                rx.foreach(partita.team1_idx, player_item),
+                rx.foreach(partita.team1_idx, player_elem),
                 width="100%",
                 align="center",
                 justify="center",
@@ -57,7 +54,7 @@ def match_item(partita: Partita):
                 align="center",
             ),
             rx.hstack(
-                rx.foreach(partita.team2_idx, player_item),
+                rx.foreach(partita.team2_idx, player_elem),
                 width="100%",
                 align="center",
                 justify="center",

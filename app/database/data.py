@@ -1,11 +1,17 @@
 import reflex as rx
 
 
-def color_quality(value, scale=[59.5, 72.5, 84.5]):
+def color_quality(value, scale=[59.5, 72.5, 84.5], reverse=False):
     return rx.cond(
-        value > scale[2],
+        value > scale[2] if not reverse else value < scale[0],
         "green",
-        rx.cond(value > scale[1], "amber", rx.cond(value > scale[0], "orange", "red")),
+        rx.cond(
+            value > scale[1] if not reverse else value < scale[1],
+            "amber",
+            rx.cond(
+                value > scale[0] if not reverse else value < scale[2], "orange", "red"
+            ),
+        ),
     )
 
 

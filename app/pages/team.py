@@ -8,6 +8,16 @@ from app.states.team import TeamState
 from app.templates import template
 
 
+def element_stat(text, value, color, unit="%", fmt=""):
+    return rx.hstack(
+        rx.text(text, color_scheme="gray"),
+        rx.badge(f"{value:{fmt}}{unit}", color_scheme=color, size="3"),
+        align="center",
+        justify="between",
+        width="100%",
+    )
+
+
 def kitchen_item(team_idx, serving, receiving, distance) -> rx.Component:
     return rx.vstack(
         rx.hstack(
@@ -34,6 +44,7 @@ def kitchen_item(team_idx, serving, receiving, distance) -> rx.Component:
             spacing="7",
             width="100%",
             justify=rx.cond(TeamState.match.is_double, "between", "center"),
+            wrap="wrap",
         ),
         rx.divider(),
         rx.hstack(
@@ -55,13 +66,7 @@ def kitchen_player_item(player_index, index, serves_data, returns_data) -> rx.Co
         color = color_quality(value, scale=scale)
         return rx.vstack(
             rx.progress(value=value, size="3", variant="soft", color_scheme=color),
-            rx.hstack(
-                rx.text(text, color_scheme="gray"),
-                rx.badge(f"{value}%", color_scheme=color, size="3"),
-                align="center",
-                justify="between",
-                width="100%",
-            ),
+            element_stat(text, value, color),
             width="100%",
         )
 
@@ -72,6 +77,73 @@ def kitchen_player_item(player_index, index, serves_data, returns_data) -> rx.Co
         element("Servizio", serves_data[index], [40, 50, 70]),
         element("Risposta", returns_data[index], [90, 92.5, 96]),
         width="100%",
+    )
+
+
+def base_pie_chart(icon, title, data, fmt="") -> rx.Component:
+    return rx.vstack(
+        rx.hstack(
+            rx.badge(
+                rx.icon(icon, size=20),
+                rx.text(title, size="4"),
+                color_scheme="gray",
+                size="3",
+            ),
+            width="100%",
+            justify="center",
+        ),
+        rx.recharts.pie_chart(
+            rx.recharts.pie(
+                data=data,
+                data_key="value",
+                name_key="name",
+                padding_angle=7,
+                inner_radius=60,
+            ),
+            rx.recharts.graphing_tooltip(separator=f" {fmt}"),
+            rx.recharts.legend(),
+            width="100%",
+            height=250,
+        ),
+        width="100%",
+    )
+
+
+def shots_item(team_idx, shots, left_side) -> rx.Component:
+    return rx.hstack(
+        base_pie_chart("flame", "Tiri totali", shots),
+        base_pie_chart("circle-arrow-left", "Lato sinistro", left_side, "%"),
+        width="100%",
+        wrap="wrap",
+    )
+
+
+def serves_returns_item(serves, returns) -> rx.Component:
+    qual_serve_color = color_quality(serves[1])
+    qual_return_color = color_quality(returns[1])
+    baseline_scale = [1.5, 2, 2.5]
+    deep_serve_color = color_quality(serves[2], baseline_scale, reverse=True)
+    deep_return_color = color_quality(returns[2], baseline_scale, reverse=True)
+    return rx.hstack(
+        rx.vstack(
+            base_pie_chart("arrow-up-from-line", "Servizi", serves[0], "%"),
+            element_stat("Qualità", serves[1], qual_serve_color),
+            element_stat(
+                "Linea di Fondo", serves[2], deep_serve_color, unit="m", fmt=".2f"
+            ),
+            width="100%",
+        ),
+        rx.vstack(
+            base_pie_chart("arrow-down-from-line", "Risposte", returns[0], "%"),
+            element_stat("Qualità", returns[1], qual_return_color),
+            element_stat(
+                "Linea di Fondo", returns[2], deep_return_color, unit="m", fmt=".2f"
+            ),
+            width="100%",
+        ),
+        spacing="6",
+        width="100%",
+        wrap="wrap",
     )
 
 
@@ -104,6 +176,36 @@ def team_page() -> rx.Component:
                     TeamState.team2_receiving,
                     TeamState.team2_distance,
                 ),
+                width="100%",
+            ),
+            width="100%",
+        ),
+        rx.hstack(
+            card(
+                shots_item(
+                    TeamState.match.team1_idx,
+                    TeamState.team1_shots,
+                    TeamState.team1_left_side,
+                ),
+                width="100%",
+            ),
+            card(
+                shots_item(
+                    TeamState.match.team2_idx,
+                    TeamState.team2_shots,
+                    TeamState.team2_left_side,
+                ),
+                width="100%",
+            ),
+            width="100%",
+        ),
+        rx.hstack(
+            card(
+                serves_returns_item(TeamState.team1_serves, TeamState.team1_returns),
+                width="100%",
+            ),
+            card(
+                serves_returns_item(TeamState.team2_serves, TeamState.team2_returns),
                 width="100%",
             ),
             width="100%",

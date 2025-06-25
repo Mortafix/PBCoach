@@ -3,17 +3,6 @@ from app.database.data import to_metric
 from app.states.overview import OverviewState
 
 
-"""
-    [X][X] arrivo in kitchen del team: su servizio e su ricezione
-    [X][X] distanza totale percorsa
-    [X][X] quanti tiri sono andati a uno piuttosto che all'altro | torta
-    [X][X] quanto i giocatori sono stati da una parte del campo (sx/dx) | torta
-    [X][X] Percentuale team servizi in e profondità
-    [X][X] Percentuale team risposte in e profondità
-    [X][ ] Percentuale terzi colpi tra drop, drive, lob con percentuale successo
-"""
-
-
 def percentage_role(data, attribute):
     roles = [
         [
@@ -33,11 +22,12 @@ def shot_stats(data, shot_type):
         (
             shot_data.get("outcome_stats").get("success_percentage"),
             shot_data.get("average_quality") * 100,
-            to_metric(shot_data.get("average_baseline_distance")),
+            round(to_metric(shot_data.get("average_baseline_distance")), 2),
         )
         for shot_data in players_shot_data
     ]
-    return [sum(attr_data) / len(attr_data) for attr_data in zip(*players_shot_attrs)]
+    data = [sum(attr_data) / len(attr_data) for attr_data in zip(*players_shot_attrs)]
+    return [data[0], int(data[1]), round(data[2], 2)]
 
 
 def thirds_stats(data):
@@ -45,13 +35,8 @@ def thirds_stats(data):
     for shot_type in ("third_drives", "third_drops", "third_lobs"):
         players_shots = [p_data.get(shot_type) for p_data in data]
         shots_stats = [
-            (
-                p_shots.get("count"),
-                p_shots.get("outcome_stats").get("success_percentage"),
-                p_shots.get("average_quality"),
-            )
+            (p_shots.get("count", 0), p_shots.get("average_quality", 0))
             for p_shots in players_shots
-            if p_shots.get("count")
         ]
         stats = [
             sum(attr_data) / (len(attr_data) if i > 0 else 1)
@@ -62,7 +47,7 @@ def thirds_stats(data):
 
 
 class TeamState(OverviewState):
-    colors: list[str] = ["blue", "tomato", "bronze"]
+    colors: list[str] = ["blue", "tomato", "plum"]
     colors_inout: list[str] = ["green", "red"]
     team1_serving: list[int]
     team2_serving: list[int]
@@ -74,12 +59,14 @@ class TeamState(OverviewState):
     team2_shots: list[dict]
     team1_left_side: list[dict]
     team2_left_side: list[dict]
-    team1_serves: tuple[list, float, float]
-    team2_serves: tuple[list, float, float]
-    team1_returns: tuple[list, float, float]
-    team2_returns: tuple[list, float, float]
-    team1_thirds: list[list[float]]
-    team2_thirds: list[list[float]]
+    team1_serves: tuple[list, int, float]
+    team2_serves: tuple[list, int, float]
+    team1_returns: tuple[list, int, float]
+    team2_returns: tuple[list, int, float]
+    team1_thirds_pie: list[dict]
+    team1_thirds_quality: list[int]
+    team2_thirds_pie: list[dict]
+    team2_thirds_quality: list[int]
 
     def _to_pie_data(self, data, indexes):
         return [
@@ -101,6 +88,19 @@ class TeamState(OverviewState):
                 "stroke": None,
             }
             for i, value in enumerate([in_perc, 100 - in_perc])
+        ]
+
+    def _to_pie_data_thirds(self, thirds):
+        third_names = ["Drive", "Drop", "Pallonetto"]
+        return [
+            {
+                "name": third_names[i],
+                "value": int(value),
+                "fill": rx.color(self.colors[i], 8),
+                "stroke": None,
+            }
+            for i, (value, _) in enumerate(thirds)
+            if value
         ]
 
     @rx.event
@@ -146,6 +146,9 @@ class TeamState(OverviewState):
         self.team1_returns = (self._to_pie_data_inout(data[0]), *data[1:])
         data = shot_stats(team2_stats, "returns")
         self.team2_returns = (self._to_pie_data_inout(data[0]), *data[1:])
-        self.team1_thirds = thirds_stats(team1_stats)
-        print(self.team1_thirds)
-        self.team2_thirds = thirds_stats(team2_stats)
+        data = thirds_stats(team1_stats)
+        self.team1_thirds_pie = self._to_pie_data_thirds(data)
+        self.team1_thirds_quality = [int(el[1] * 100) for el in data]
+        data = thirds_stats(team2_stats)
+        self.team2_thirds_pie = self._to_pie_data_thirds(data)
+        self.team2_thirds_quality = [int(el[1] * 100) for el in data]

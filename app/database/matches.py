@@ -19,6 +19,7 @@ class Partita(rx.Base):
     players: list[str]
     players_full: list[str]
     players_ids: list[int]
+    players_full_ids: list[int]
     players_n: int
     score: tuple[int, int]
     team1_idx: list[int]
@@ -28,7 +29,8 @@ class Partita(rx.Base):
 
 
 def parse_model(data):
-    players = [get_player_name(p_id, short=True) for p_id in data.get("players_ids")]
+    players_ids = data.get("players_ids")
+    players = [get_player_name(p_id, short=True) for p_id in players_ids]
     players_n = len(players)
     score = data.get("game", {}).get("game_outcome")
     return Partita(
@@ -43,7 +45,10 @@ def parse_model(data):
         weather=data.get("info").get("weather"),
         players=players,
         players_full=players if players_n == 4 else [players[0], "", players[1], ""],
-        players_ids=data.get("players_ids"),
+        players_ids=players_ids,
+        players_full_ids=players_ids
+        if players_n == 4
+        else [players_ids[0], 0, players_ids[1], 0],
         players_n=players_n,
         score=score,
         team1_idx=[0, 1] if players_n == 4 else [0],

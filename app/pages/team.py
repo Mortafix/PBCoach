@@ -234,27 +234,30 @@ def team_page() -> rx.Component:
             width="100%",
             wrap="wrap",
         ),
-        rx.hstack(
-            card(
-                shots_item(
-                    TeamState.match.team1_idx,
-                    TeamState.team1_shots,
-                    TeamState.team1_left_side,
+        rx.cond(
+            TeamState.match.is_double,
+            rx.hstack(
+                card(
+                    shots_item(
+                        TeamState.match.team1_idx,
+                        TeamState.team1_shots,
+                        TeamState.team1_left_side,
+                    ),
+                    width="100%",
+                    flex="1 1 49%",
+                ),
+                card(
+                    shots_item(
+                        TeamState.match.team2_idx,
+                        TeamState.team2_shots,
+                        TeamState.team2_left_side,
+                    ),
+                    width="100%",
+                    flex="1 1 49%",
                 ),
                 width="100%",
-                flex="1 1 49%",
+                wrap="wrap",
             ),
-            card(
-                shots_item(
-                    TeamState.match.team2_idx,
-                    TeamState.team2_shots,
-                    TeamState.team2_left_side,
-                ),
-                width="100%",
-                flex="1 1 49%",
-            ),
-            width="100%",
-            wrap="wrap",
         ),
         rx.hstack(
             card(

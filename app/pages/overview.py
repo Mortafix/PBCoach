@@ -7,9 +7,17 @@ from app.states.overview import OverviewState
 from app.templates import template
 
 
-def player_elem(index, full_index=True) -> rx.Component:
-    name = OverviewState.match.players[index]
-    player_id = OverviewState.match.players_ids[index]
+def player_elem(index, full_index=False) -> rx.Component:
+    name = rx.cond(
+        full_index,
+        OverviewState.match.players_full[index],
+        OverviewState.match.players[index],
+    )
+    player_id = rx.cond(
+        full_index,
+        OverviewState.match.players_full_ids[index],
+        OverviewState.match.players_ids[index],
+    )
     return player_item(player_id, name)
 
 
@@ -39,7 +47,7 @@ def achiever_item(title, achiever, description) -> rx.Component:
             high_contrast=True,
             size="3",
         ),
-        player_elem(player_idx),
+        player_elem(player_idx, full_index=True),
         rx.hstack(
             rx.text(value, size="8"),
             rx.text(description, color_scheme="gray"),
@@ -62,7 +70,7 @@ def quality_item(data, player_index):
         )
 
     element = rx.vstack(
-        player_elem(player_index),
+        player_elem(player_index, full_index=True),
         rx.progress(
             value=data[0],
             size="3",

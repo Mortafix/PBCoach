@@ -1,5 +1,9 @@
 import reflex as rx
-from app.components.input import btn_text_icon
+from app.components.input import btn_icon, btn_text_icon
+
+hamburger_visible = ["visible", "visible", "visible", "visible", "visible", "hidden"]
+visible_mobile = ["flex", "flex", "flex", "none"]
+hidden_mobile = ["none", "none", "none", "flex"]
 
 
 def header_button(text: str, icon: str, href: str) -> rx.Component:
@@ -32,21 +36,38 @@ def header(state) -> rx.Component:
             wrap="wrap",
             spacing="5",
             align="center",
+            display=hidden_mobile,
         ),
-        rx.button(
-            rx.icon("menu"),
-            visibility=[
-                "visible",
-                "visible",
-                "visible",
-                "visible",
-                "visible",
-                "hidden",
-            ],
-            color_scheme="gray",
-            variant="ghost",
-            cursor="pointer",
-            on_click=state.toggle_sidebar_force,
+        # mobile menu
+        rx.hstack(
+            rx.hstack(
+                btn_icon(
+                    "medal",
+                    color_scheme="gray",
+                    variant="soft",
+                    on_click=rx.redirect("/matches"),
+                ),
+                btn_icon(
+                    "users",
+                    color_scheme="gray",
+                    variant="soft",
+                    on_click=rx.redirect("/players"),
+                ),
+                btn_icon(
+                    "cloud-upload", variant="soft", on_click=rx.redirect("/upload")
+                ),
+                align="center",
+                display=visible_mobile,
+            ),
+            rx.button(
+                rx.icon("menu"),
+                color_scheme="gray",
+                variant="ghost",
+                cursor="pointer",
+                on_click=state.toggle_sidebar_force,
+                visibility=hamburger_visible,
+            ),
+            align="center",
         ),
         align="center",
         justify="between",
@@ -56,7 +77,6 @@ def header(state) -> rx.Component:
         top="0px",
         left="0px",
         z_index=10,
-        # height="5dvh",
         min_height="3rem",
         padding_inline="1em",
         bg=rx.color("gray", 2),

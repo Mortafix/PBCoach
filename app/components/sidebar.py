@@ -196,6 +196,7 @@ def sidebar(state) -> rx.Component:
             height="96dvh",
             padding="1em",
             z_index=5,
+            bg=rx.color("gray", 3),
         ),
         max_width=rx.cond(state.is_sidebar_open, sidebar_width, sidebar_close_width),
         display=[

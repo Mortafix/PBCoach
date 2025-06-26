@@ -15,31 +15,34 @@ def color_quality(value, scale=[59.5, 72.5, 84.5], reverse=False):
     )
 
 
-def shots_name_italian(shot):
-    return rx.match(
-        shot,
-        ("serves", "Servizio"),
-        ("returns", "Risposta"),
-        ("drives", "Drive"),
-        ("drops", "Drop"),
-        ("dinks", "Dink"),
-        ("lobs", "Pallonetto"),
-        ("smashes", "Smash"),
-        ("third_drives", "Terzo drive"),
-        ("third_drops", "Terzo drop"),
-        ("third_lobs", "Terzo pallonetto"),
-        ("resets", "Reset"),
-        ("speedups", "Velocizzazione"),
-        ("passing", "Passante"),
-        ("poaches", "Anticipo"),
-        ("forehands", "Dritto"),
-        ("backhands", "Rovescio"),
-        ("thirds", "Tero colpo"),
-        ("fourths", "Quarto colpo"),
-        ("fifths", "Quinto colpo"),
-        "Sconosciuto",
-    )
+def shots_name_italian(shot, str_type=False):
+    shots_name = {
+        "serves": "Servizio",
+        "returns": "Risposta",
+        "drives": "Drive",
+        "drops": "Drop",
+        "dinks": "Dink",
+        "lobs": "Pallonetto",
+        "smashes": "Smash",
+        "third_drives": "Terzo drive",
+        "third_drops": "Terzo drop",
+        "third_lobs": "Terzo pallonetto",
+        "resets": "Reset",
+        "speedups": "Velocizzazione",
+        "passing": "Passante",
+        "poaches": "Anticipo",
+        "forehands": "Dritto",
+        "backhands": "Rovescio",
+        "thirds": "Tero colpo",
+        "fourths": "Quarto colpo",
+        "fifths": "Quinto colpo",
+    }
+    if str_type:
+        return shots_name.get(shot, "Sconosciuto")
+    return rx.match(shot, *(tuple(shots_name.items())), "Sconosciuto")
 
 
-def to_metric(imperial_value):
+def to_metric(imperial_value, velocity=False):
+    if velocity:
+        return imperial_value * 1.609344
     return imperial_value * 0.3048

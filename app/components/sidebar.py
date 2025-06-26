@@ -35,6 +35,8 @@ def sidebar_header(state) -> rx.Component:
 
 
 def sidebar_menu(state) -> rx.Component:
+    match_id = getattr(state, "match_id", None)
+
     def nav_item(icon, text, href) -> rx.Component:
         is_active = rx.State.router.page.path.split("/")[-1] == href[1:]
         return rx.link(
@@ -43,7 +45,7 @@ def sidebar_menu(state) -> rx.Component:
                 rx.text(text, size="5", weight=rx.cond(is_active, "bold", "regular")),
                 align="center",
             ),
-            href=f"/{state.match_id}{href}",
+            href=f"/{match_id}{href}",
             underline="none",
             color=rx.color("white", 7),
             padding="0.25em 0.7em",
@@ -56,7 +58,7 @@ def sidebar_menu(state) -> rx.Component:
         is_active = rx.State.router.page.path.split("/")[-1] == href[1:]
         return rx.link(
             rx.icon(icon, size=22, stroke_width=rx.cond(is_active, 2.5, 2)),
-            href=f"/{state.match_id}{href}",
+            href=f"/{match_id}{href}",
             underline="none",
             color=rx.color("white", 7),
             padding="0.4em 0.4em",
@@ -86,6 +88,7 @@ def sidebar_menu(state) -> rx.Component:
 
 def sidebar_menu_players(state) -> rx.Component:
     def player_sidebar_item(name, idx, opponent=False, show_name=True) -> rx.Component:
+        match_id = getattr(state, "match_id", None)
         return rx.link(
             rx.hstack(
                 rx.avatar(
@@ -104,7 +107,7 @@ def sidebar_menu_players(state) -> rx.Component:
                 ),
                 align="center",
             ),
-            href=f"/{state.match_id}/player/{idx}",
+            href=f"/{match_id}/player/{idx}",
             underline="none",
             padding=rx.cond(state.is_sidebar_open, "0.4rem 0.8rem", "0.25rem 0.25rem"),
             border_radius="1em",
@@ -179,7 +182,7 @@ def sidebar_footer(state) -> rx.Component:
 
 
 def sidebar(state) -> rx.Component:
-    return rx.flex(
+    sidebar_elem = rx.flex(
         rx.vstack(
             sidebar_minimize(state),
             sidebar_header(state),
@@ -217,3 +220,4 @@ def sidebar(state) -> rx.Component:
         z_index=5,
         bg=rx.color("gray", 3),
     )
+    return rx.cond(state.match_stats, sidebar_elem, None)

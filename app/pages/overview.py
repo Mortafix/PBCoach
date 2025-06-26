@@ -1,8 +1,9 @@
 import reflex as rx
 from app.components.cards import card
-from app.components.extra import page_loading, page_title
+from app.components.extra import page_title
 from app.components.player import player_item
 from app.database.data import color_quality, shots_name_italian
+from app.pages.extra import match_not_found
 from app.states.overview import OverviewState
 from app.templates import template
 
@@ -21,10 +22,15 @@ def player_elem(index, full_index=False) -> rx.Component:
     return player_item(player_id, name)
 
 
-def info_item(name, icon, value) -> rx.Component:
+def info_item(name, icon, value, add_info="", spacing="0") -> rx.Component:
     return rx.vstack(
         rx.hstack(rx.icon(icon), rx.text(name), align="center", opacity=0.75),
-        rx.text(value, size="8"),
+        rx.hstack(
+            rx.text(value, size="8"),
+            rx.text(add_info, color_scheme="gray", size="6"),
+            align="end",
+            spacing=spacing,
+        ),
         align="center",
     )
 
@@ -155,8 +161,9 @@ def home_page() -> rx.Component:
                     OverviewState.match.location_type == "Outdoor",
                     info_item("Meteo", "cloud-sun", OverviewState.match.weather),
                 ),
+                spacing="5",
                 align="center",
-                justify="between",
+                justify_content="space-evenly",
                 width="100%",
                 wrap="wrap",
             ),
@@ -208,4 +215,4 @@ def home_page() -> rx.Component:
         spacing="5",
         width="100%",
     )
-    return rx.cond(OverviewState.match, page, page_loading())
+    return rx.cond(OverviewState.is_match_found, page, match_not_found())

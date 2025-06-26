@@ -3,6 +3,7 @@ from app.database.matches import Partita
 
 
 class State(rx.State):
+    is_header_open: bool = True
     is_sidebar_open: bool = True
     is_sidebar_force_open: bool = False
     is_in_match: bool = False
@@ -12,7 +13,9 @@ class State(rx.State):
     previous_page: str = "/"
 
     # ---- MATCH
-    match: Partita | None = ""
+    match: Partita | None = None
+    match_stats: dict = {}
+    match_insights: dict = {}
 
     # ---- VARS
 
@@ -28,6 +31,7 @@ class State(rx.State):
         if self.current_url != self.current_page:
             self.previous_page = self.current_page
             self.current_page = self.current_url
+        self.is_header_open = True
         self.is_sidebar_force_open = False
         self.is_sidebar_open = False
         self.is_in_match = False

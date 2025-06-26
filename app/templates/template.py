@@ -41,7 +41,7 @@ def template(
 
         def templated_page():
             return rx.vstack(
-                header(State),
+                rx.cond(State.is_header_open, header(State)),
                 rx.flex(
                     rx.cond(State.is_in_match, sidebar(State)),
                     rx.flex(

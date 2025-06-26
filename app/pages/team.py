@@ -1,8 +1,10 @@
 import reflex as rx
 from app.components.cards import card
-from app.components.extra import page_loading, page_title
+from app.components.charts import base_pie_chart
+from app.components.extra import page_title
 from app.components.player import player_item
 from app.database.data import color_quality
+from app.pages.extra import match_not_found
 from app.states.overview import OverviewState
 from app.states.team import TeamState
 from app.templates import template
@@ -74,37 +76,6 @@ def kitchen_player_item(player_index, index, serves_data, returns_data) -> rx.Co
         element("Risposta", returns_data[index], [90, 92.5, 96]),
         width="100%",
         flex="1 1 45%",
-    )
-
-
-def base_pie_chart(icon, title, data, fmt=": ") -> rx.Component:
-    return rx.vstack(
-        rx.hstack(
-            rx.badge(
-                rx.icon(icon, size=20),
-                rx.text(title, size="4"),
-                color_scheme="gray",
-                size="3",
-            ),
-            width="100%",
-            justify="center",
-        ),
-        rx.recharts.pie_chart(
-            rx.recharts.pie(
-                data=data,
-                data_key="value",
-                name_key="name",
-                padding_angle=7,
-                inner_radius=60,
-            ),
-            rx.recharts.graphing_tooltip(separator=f" {fmt}"),
-            rx.recharts.legend(),
-            width=250,
-            height=250,
-        ),
-        width="100%",
-        flex="1 1 45%",
-        align="center",
     )
 
 
@@ -306,4 +277,4 @@ def team_page() -> rx.Component:
         spacing="5",
         width="100%",
     )
-    return rx.cond(TeamState.match, page, page_loading())
+    return rx.cond(OverviewState.is_match_found, page, match_not_found())

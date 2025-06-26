@@ -7,7 +7,7 @@ from app.database.connection import DB
 
 
 def get_match_stats(code):
-    return DB.stats.find_one({"code": code})
+    return DB.stats.find_one({"code": code}) or dict()
 
 
 def get_match_insights(code):

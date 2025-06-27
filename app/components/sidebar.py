@@ -18,6 +18,7 @@ def sidebar_minimize(state) -> rx.Component:
         top=10,
         right=rx.cond(state.is_sidebar_open, 15, 25),
         padding=0,
+        display=["none", "block", "block", "block"],
     )
 
 
@@ -200,11 +201,17 @@ def sidebar(state) -> rx.Component:
             position="fixed",
             overflow="auto",
             align="end",
-            width=rx.cond(state.is_sidebar_open, sidebar_width, sidebar_close_width),
+            width=[
+                rx.cond(state.is_sidebar_open, "100%", 0),
+                rx.cond(state.is_sidebar_open, sidebar_width, sidebar_close_width),
+                rx.cond(state.is_sidebar_open, sidebar_width, sidebar_close_width),
+            ],
             height="96dvh",
             padding="1em",
             z_index=5,
             bg=rx.color("gray", 3),
+            left=0,
+            top="3rem",
         ),
         max_width=rx.cond(state.is_sidebar_open, sidebar_width, sidebar_close_width),
         display=[

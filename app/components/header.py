@@ -67,7 +67,7 @@ def header(state) -> rx.Component:
                 display=visible_mobile,
             ),
             rx.button(
-                rx.icon("menu"),
+                rx.cond(state.is_sidebar_force_open, rx.icon("x"), rx.icon("menu")),
                 color_scheme="gray",
                 variant="ghost",
                 cursor="pointer",

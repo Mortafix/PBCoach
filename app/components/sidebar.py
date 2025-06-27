@@ -91,11 +91,12 @@ def sidebar_menu(state) -> rx.Component:
 def sidebar_menu_players(state) -> rx.Component:
     def player_sidebar_item(name, idx, opponent=False, show_name=True) -> rx.Component:
         is_active = state.router.page.params.get("player_id").to(str) == idx.to_string()
+        player_id = state.match.players_full_ids[idx]
         match_id = getattr(state, "match_id", None)
         return rx.link(
             rx.hstack(
                 rx.avatar(
-                    name,
+                    src=f"/players/{player_id}.jpg",
                     radius="full",
                     fallback=name[:2],
                     color_scheme=rx.cond(opponent, "tomato", "indigo"),

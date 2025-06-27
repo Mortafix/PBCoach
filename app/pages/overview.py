@@ -80,7 +80,7 @@ def player_quality(data, player_index):
         base_item("Peggiore", shots_name_italian(data[1])),
         spacing="2",
         align="center",
-        min_width="20%",
+        flex=["100%", "100%", "45%", "45%", "20%", "20%"],
     )
     return rx.cond(data[0] > 0, element, None)
 
@@ -168,9 +168,11 @@ def home_page() -> rx.Component:
         card(
             rx.hstack(
                 rx.foreach(OverviewState.players_quality, player_quality),
+                spacing="8",
                 align="center",
-                justify="between",
+                justify_content="space-evenly",
                 width="100%",
+                wrap="wrap",
             ),
             width="100%",
         ),

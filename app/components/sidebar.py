@@ -51,6 +51,7 @@ def sidebar_menu(state) -> rx.Component:
             padding="0.25em 0.7em",
             border_radius="1em",
             opacity=rx.cond(is_active, 1, 0.8),
+            bg=rx.cond(is_active, rx.color("gray", 4), None),
             _hover={"bg": rx.color("gray", 5)},
         )
 
@@ -64,6 +65,7 @@ def sidebar_menu(state) -> rx.Component:
             padding="0.4em 0.4em",
             border_radius="1em",
             opacity=rx.cond(is_active, 1, 0.8),
+            bg=rx.cond(is_active, rx.color("gray", 4), None),
             _hover={"bg": rx.color("gray", 5)},
         )
 
@@ -88,6 +90,7 @@ def sidebar_menu(state) -> rx.Component:
 
 def sidebar_menu_players(state) -> rx.Component:
     def player_sidebar_item(name, idx, opponent=False, show_name=True) -> rx.Component:
+        is_active = state.router.page.params.get("player_id").to(str) == idx.to_string()
         match_id = getattr(state, "match_id", None)
         return rx.link(
             rx.hstack(
@@ -111,6 +114,7 @@ def sidebar_menu_players(state) -> rx.Component:
             underline="none",
             padding=rx.cond(state.is_sidebar_open, "0.4rem 0.8rem", "0.25rem 0.25rem"),
             border_radius="1em",
+            bg=rx.cond(is_active, rx.color("gray", 4), None),
             _hover={"bg": rx.color("gray", 5)},
         )
 

@@ -14,13 +14,12 @@ class ExtraState(State):
 @template(title="404", on_load=ExtraState.on_load)
 def not_found_page() -> rx.Component:
     return rx.vstack(
+        rx.image(src="/images/coach_searching.webp", height=300),
         rx.text("Pagina non trovata", size="9", weight="medium"),
-        rx.callout(
-            "Non è stata trovata nessuna pagina a questo indirizzo.. "
-            "controlla e riprova",
-            icon="info",
-            size="2",
-            color_scheme="yellow",
+        rx.text(
+            "Non ho trovato quello che stavi cercando.. controlla e riprova!",
+            size="5",
+            color_scheme="gray",
         ),
         rx.link(
             btn_text_icon("move_left", "Home", spacing="2", variant="soft"), href="/"
@@ -34,13 +33,12 @@ def not_found_page() -> rx.Component:
 
 def match_not_found() -> rx.Component:
     return rx.vstack(
-        rx.text("Match non trovato", size="9", weight="medium"),
-        rx.callout(
-            "Non è stata trovata nessuna pagina a questo indirizzo.. "
-            "controlla e riprova",
-            icon="info",
-            size="2",
-            color_scheme="yellow",
+        rx.image(src="/images/coach_perplexed.webp", height=300),
+        rx.text("Partita non trovata", size="9", weight="medium"),
+        rx.text(
+            "Non ho trovato la partita da analizzare.. sei sicuro di averla giocata?",
+            size="5",
+            color_scheme="gray",
         ),
         rx.link(
             btn_text_icon("move_left", "Partite", spacing="2", variant="soft"),

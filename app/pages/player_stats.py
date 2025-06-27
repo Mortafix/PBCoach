@@ -223,24 +223,39 @@ def team_page() -> rx.Component:
                     width="100%",
                 ),
                 rx.divider(),
-                rx.markdown(
-                    PlayerState.current_advice,
-                    component_map={
-                        "h1": lambda text: rx.heading(
-                            text, size="6", margin_bottom="1rem"
+                rx.hstack(
+                    rx.image(
+                        src="/images/coach_advice.webp", width="100%", max_width="25rem"
+                    ),
+                    rx.vstack(
+                        rx.markdown(
+                            PlayerState.current_advice,
+                            component_map={
+                                "h1": lambda text: rx.heading(
+                                    text, size="6", margin_bottom="1rem"
+                                ),
+                                "h2": lambda text: rx.heading(
+                                    text, size="5", margin_bottom=0
+                                ),
+                                "p": lambda text: rx.text(text, margin_bottom=0),
+                                "blockquote": lambda text: rx.box(
+                                    text,
+                                    font_style="italic",
+                                    bg=rx.color("gray", 4),
+                                    padding="0.2rem 0.7rem",
+                                    border_left="5px solid",
+                                    border_color=rx.color("amber", 9),
+                                ),
+                            },
                         ),
-                        "h2": lambda text: rx.heading(text, size="5", margin_bottom=0),
-                        "p": lambda text: rx.text(text, margin_bottom=0),
-                        "blockquote": lambda text: rx.box(
-                            text,
-                            font_style="italic",
-                            bg=rx.color("gray", 4),
-                            padding="0.2rem 0.7rem",
-                            border_left="5px solid",
-                            border_color=rx.color("amber", 9),
-                        ),
-                    },
+                        width="100%",
+                    ),
+                    width="100%",
+                    align="end",
+                    flex_wrap=["wrap", "wrap", "wrap", "nowrap", "nowrap"],
+                    justify="center",
                 ),
+                width="100%",
             ),
             width="100%",
         ),

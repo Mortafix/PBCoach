@@ -2,6 +2,7 @@ import reflex as rx
 from app.components.cards import card
 from app.components.extra import page_title
 from app.components.player import player_item
+from app.components.shots import base_item, quality_item
 from app.database.data import color_quality, shots_name_italian
 from app.pages.extra import match_not_found
 from app.states.overview import OverviewState
@@ -65,16 +66,7 @@ def achiever_item(title, achiever, description) -> rx.Component:
     )
 
 
-def quality_item(data, player_index):
-    def quality_element(text, value):
-        return rx.hstack(
-            rx.text(text, color_scheme="gray"),
-            value,
-            align="center",
-            justify="between",
-            width="100%",
-        )
-
+def player_quality(data, player_index):
     element = rx.vstack(
         player_elem(player_index, full_index=True),
         rx.progress(
@@ -83,18 +75,9 @@ def quality_item(data, player_index):
             variant="soft",
             color_scheme=color_quality(data[0]),
         ),
-        quality_element(
-            "Qualità",
-            rx.badge(f"{data[0]}%", color_scheme=color_quality(data[0]), size="3"),
-        ),
-        quality_element(
-            "Migliore",
-            rx.badge(shots_name_italian(data[2]), color_scheme="gray", size="3"),
-        ),
-        quality_element(
-            "Peggiore",
-            rx.badge(shots_name_italian(data[1]), color_scheme="gray", size="3"),
-        ),
+        quality_item("Qualità", data[0]),
+        base_item("Migliore", shots_name_italian(data[2])),
+        base_item("Peggiore", shots_name_italian(data[1])),
         spacing="2",
         align="center",
         min_width="20%",
@@ -184,7 +167,7 @@ def home_page() -> rx.Component:
         ),
         card(
             rx.hstack(
-                rx.foreach(OverviewState.players_quality, quality_item),
+                rx.foreach(OverviewState.players_quality, player_quality),
                 align="center",
                 justify="between",
                 width="100%",

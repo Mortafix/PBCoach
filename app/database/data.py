@@ -2,14 +2,15 @@ import reflex as rx
 
 
 def color_quality(value, scale=[59.5, 72.5, 84.5], reverse=False):
+    scale = rx.cond(reverse, scale[::-1], scale)
     return rx.cond(
-        value > scale[2] if not reverse else value < scale[0],
+        rx.cond(reverse, value < scale[0], value > scale[2]),
         "green",
         rx.cond(
-            value > scale[1] if not reverse else value < scale[1],
+            rx.cond(reverse, value < scale[1], value > scale[1]),
             "amber",
             rx.cond(
-                value > scale[0] if not reverse else value < scale[2], "orange", "red"
+                rx.cond(reverse, value < scale[2], value > scale[0]), "orange", "red"
             ),
         ),
     )
@@ -24,9 +25,9 @@ def shots_name_italian(shot, str_type=False):
         "dinks": "Dink",
         "lobs": "Pallonetto",
         "smashes": "Smash",
-        "third_drives": "Terzo drive",
-        "third_drops": "Terzo drop",
-        "third_lobs": "Terzo pallonetto",
+        "third_drives": "Drive",
+        "third_drops": "Drop",
+        "third_lobs": "Pallonetto",
         "resets": "Reset",
         "speedups": "Velocizzazione",
         "passing": "Passante",

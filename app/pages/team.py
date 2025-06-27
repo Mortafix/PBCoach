@@ -3,21 +3,12 @@ from app.components.cards import card
 from app.components.charts import base_pie_chart
 from app.components.extra import page_title
 from app.components.player import player_item
+from app.components.shots import custom_item, deep_item, quality_item
 from app.database.data import color_quality
 from app.pages.extra import match_not_found
 from app.states.overview import OverviewState
 from app.states.team import TeamState
 from app.templates import template
-
-
-def element_stat(text, value, color, unit="%"):
-    return rx.hstack(
-        rx.text(text, color_scheme="gray"),
-        rx.badge(f"{value}{unit}", color_scheme=color, size="3"),
-        align="center",
-        justify="between",
-        width="100%",
-    )
 
 
 def kitchen_item(team_idx, serving, receiving, distance) -> rx.Component:
@@ -64,7 +55,7 @@ def kitchen_player_item(player_index, index, serves_data, returns_data) -> rx.Co
         color = color_quality(value, scale=scale)
         return rx.vstack(
             rx.progress(value=value, size="3", variant="soft", color_scheme=color),
-            element_stat(text, value, color),
+            custom_item(text, value, elem_type="quality", scale=scale),
             width="100%",
         )
 
@@ -94,11 +85,6 @@ def serves_returns_item(team_idx, serves, returns) -> rx.Component:
         name = TeamState.match.players[player_index]
         return player_item(player_id, name)
 
-    qual_serve_color = color_quality(serves[1])
-    qual_return_color = color_quality(returns[1])
-    baseline_scale = [1.5, 2, 2.5]
-    deep_serve_color = color_quality(serves[2], baseline_scale, reverse=True)
-    deep_return_color = color_quality(returns[2], baseline_scale, reverse=True)
     return rx.vstack(
         rx.hstack(
             rx.foreach(team_idx, player_team),
@@ -111,15 +97,15 @@ def serves_returns_item(team_idx, serves, returns) -> rx.Component:
         rx.hstack(
             rx.vstack(
                 base_pie_chart("arrow-up-from-line", "Servizi", serves[0], ": %"),
-                element_stat("Qualità", serves[1], qual_serve_color),
-                element_stat("Linea di Fondo", serves[2], deep_serve_color, unit="m"),
+                quality_item("Qualità", serves[1]),
+                deep_item("Profondità", serves[2]),
                 width="100%",
                 flex="1 1 45%",
             ),
             rx.vstack(
                 base_pie_chart("arrow-down-from-line", "Risposte", returns[0], ": %"),
-                element_stat("Qualità", returns[1], qual_return_color),
-                element_stat("Linea di Fondo", returns[2], deep_return_color, unit="m"),
+                quality_item("Qualità", returns[1]),
+                deep_item("Profondità", returns[2]),
                 width="100%",
                 flex="1 1 45%",
             ),
@@ -137,9 +123,6 @@ def thirds_item(team_idx, thirds_data, thirds_quality) -> rx.Component:
         name = TeamState.match.players[player_index]
         return player_item(player_id, name)
 
-    qual_drive_color = color_quality(thirds_quality[0])
-    qual_drop_color = color_quality(thirds_quality[1])
-    qual_lob_color = color_quality(thirds_quality[2])
     return rx.vstack(
         rx.hstack(
             rx.foreach(team_idx, player_team),
@@ -150,18 +133,16 @@ def thirds_item(team_idx, thirds_data, thirds_quality) -> rx.Component:
         ),
         rx.divider(margin_bottom="0.25rem"),
         rx.vstack(
-            base_pie_chart("dice-3", "Terzo Colpo", thirds_data),
+            base_pie_chart("dice-3", "Terzo colpo", thirds_data),
             rx.cond(
-                thirds_quality[0] != 0,
-                element_stat("Qualità Drive", thirds_quality[0], qual_drive_color),
+                thirds_quality[0] != 0, quality_item("Qualità Drive", thirds_quality[0])
             ),
             rx.cond(
-                thirds_quality[1] != 0,
-                element_stat("Qualità Drop", thirds_quality[1], qual_drop_color),
+                thirds_quality[1] != 0, quality_item("Qualità Drop", thirds_quality[1])
             ),
             rx.cond(
                 thirds_quality[2] != 0,
-                element_stat("Qualità Pallonetto", thirds_quality[2], qual_lob_color),
+                quality_item("Qualità Pallonetto", thirds_quality[2]),
             ),
             width="100%",
         ),

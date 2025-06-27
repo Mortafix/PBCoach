@@ -24,7 +24,7 @@ def sidebar_minimize(state) -> rx.Component:
 def sidebar_header(state) -> rx.Component:
     header = rx.vstack(
         rx.text(state.match.name, size="8", align="center"),
-        rx.text(state.match.date_str, color_scheme="gray", align="center"),
+        rx.text(state.match.date_str, size="4", color_scheme="gray", align="center"),
         width="100%",
         align="center",
         justify="center",
@@ -126,7 +126,7 @@ def sidebar_menu_players(state) -> rx.Component:
         ),
         rx.vstack(
             rx.foreach(
-                state.match.players,
+                state.match.players_full,
                 lambda el, idx: rx.cond(
                     el,
                     player_sidebar_item(

@@ -16,23 +16,30 @@ class Shot(rx.Base):
     net_height: int
     speed: int
     fastest: int
+    is_reverse_deep: bool = False
+    pie_inout: list[dict]
 
 
-def shot_stats(player_data, shot_name):
+def shot_stats(player_data, shot_name, reverse_deep=False):
     data = player_data.get(shot_name)
     outcome = data.get("outcome_stats", {})
     speed = data.get("speed_stats", {})
+    out_p = outcome.get("out_fault_percentage", 0)
+    net_p = outcome.get("net_fault_percentage", 0)
+    success_p = max(100 - (out_p + net_p), 0)
     return Shot(
         name=shots_name_italian(shot_name, str_type=True),
         count=data.get("count"),
-        quality=data.get("average_quality", 0),
-        success=outcome.get("success_percentage", 0),
-        out=outcome.get("out_fault_percentage", 0),
-        net=outcome.get("net_fault_percentage", 0),
+        quality=round(data.get("average_quality", 0) * 100),
+        success=success_p,
+        out=out_p,
+        net=net_p,
         baseline_distance=round(to_metric(data.get("average_baseline_distance", 0)), 2),
         net_height=int(to_metric(data.get("average_height_above_net", 0)) * 100),
         speed=round(to_metric(speed.get("average", 0), velocity=True)),
         fastest=round(to_metric(speed.get("fastest", 0), velocity=True)),
+        is_reverse_deep=reverse_deep,
+        pie_inout=to_pie_data_inout(success_p, out_p, net_p),
     )
 
 
@@ -56,7 +63,21 @@ def parse_advice(advice_data):
 # ----- STATE
 
 
+def to_pie_data_inout(success, out, net):
+    return [
+        {
+            "name": ["Dentro", "Fuori", "Rete"][i],
+            "value": round(value),
+            "fill": rx.color(["green", "red", "crimson"][i], 8),
+            "stroke": None,
+        }
+        for i, value in enumerate([success, out, net])
+        if value
+    ]
+
+
 class PlayerState(OverviewState):
+    colors: list[str] = ["blue", "tomato", "plum"]
     player_name: str = ""
     distance: int
     shots: int
@@ -64,7 +85,9 @@ class PlayerState(OverviewState):
     quality: float
     faults: float
     serves: Shot = None
+    serves_inout: list[dict] = []
     returns: Shot = None
+    returns_inout: list[dict] = []
     drives: Shot = None
     drops: Shot = None
     dinks: Shot = None
@@ -73,18 +96,40 @@ class PlayerState(OverviewState):
     third_drives: Shot = None
     third_drops: Shot = None
     third_lobs: Shot = None
+    thirds: list[dict] = []
     resets: Shot = None
     speedups: Shot = None
     passing: Shot = None
     poaches: Shot = None
     forehands: Shot = None
     backhands: Shot = None
+    hands: list[dict] = []
     advices: list[Advice] = []
+    # ---- page
+    info_shots: list[Shot] = []
+    zero_shots: list[Shot] = []
+    current_shot: Shot | None = None
+
+    def _to_pie_data_multiple(self, *shots):
+        return [
+            {
+                "name": shot.name,
+                "value": int(shot.count),
+                "fill": rx.color(self.colors[i], 8),
+                "stroke": None,
+            }
+            for i, shot in enumerate(shots)
+            if shot.count
+        ]
+
+    @rx.event
+    def change_shot(self, shot: Shot):
+        self.current_shot = shot
 
     @rx.event
     def on_load(self):
         player_id = int(self.player_id)
-        self.player_name = self.match.players[player_id]
+        self.player_name = self.match.players_full[player_id]
         # player stats
         data = self.match_stats.get("players")[player_id]
         self.distance = int(to_metric(data.get("total_distance_covered")))
@@ -94,6 +139,7 @@ class PlayerState(OverviewState):
             if player_id in self.match.team1_idx
             else self.match.team2_idx
         )
+        team_index = team_index if self.match.is_double else [player_id]
         self.shots_total = sum(
             p_data.get("shot_count")
             for p_data in [self.match_stats.get("players")[p_id] for p_id in team_index]
@@ -106,21 +152,43 @@ class PlayerState(OverviewState):
         self.serves = shot_stats(data, "serves")
         self.returns = shot_stats(data, "returns")
         self.drives = shot_stats(data, "drives")
-        self.drops = shot_stats(data, "drops")
-        self.dinks = shot_stats(data, "dinks")
+        self.drops = shot_stats(data, "drops", reverse_deep=True)
+        self.dinks = shot_stats(data, "dinks", reverse_deep=True)
         self.lobs = shot_stats(data, "lobs")
         self.smashes = shot_stats(data, "smashes")
         self.third_drives = shot_stats(data, "third_drives")
-        self.third_drops = shot_stats(data, "third_drops")
-        self.third_lobs = shot_stats(data, "third_lobs")
+        self.third_drops = shot_stats(data, "third_drops", reverse_deep=True)
+        self.third_lobs = shot_stats(data, "third_lobs", reverse_deep=True)
+        self.thirds = self._to_pie_data_multiple(
+            self.third_drives, self.third_drops, self.third_lobs
+        )
         self.resets = shot_stats(data, "resets")
         self.speedups = shot_stats(data, "speedups")
         self.passing = shot_stats(data, "passing")
         self.poaches = shot_stats(data, "poaches")
         self.forehands = shot_stats(data, "forehands")
         self.backhands = shot_stats(data, "backhands")
+        self.hands = self._to_pie_data_multiple(self.forehands, self.backhands)
         self.advices = [
             parse_advice(data)
             for data in self.match_insights.get("coach_advice")[player_id].get("advice")
         ]
-        print(self.advices)
+        # ---- page
+        self.current_shot = self.serves
+        info_shots = [
+            self.serves,
+            self.returns,
+            self.drives,
+            self.drops,
+            self.dinks,
+            self.lobs,
+            self.smashes,
+            self.resets,
+            self.speedups,
+            self.passing,
+            self.poaches,
+            self.forehands,
+            self.backhands,
+        ]
+        self.info_shots = sorted(info_shots, key=lambda el: el.quality)
+        self.zero_shots = [shot for shot in info_shots if shot.count == 0]

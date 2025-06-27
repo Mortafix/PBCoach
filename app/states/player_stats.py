@@ -1,3 +1,5 @@
+from os import path
+
 import reflex as rx
 from app.database.data import shots_name_italian, to_metric
 from app.states.overview import OverviewState
@@ -109,6 +111,7 @@ class PlayerState(OverviewState):
     info_shots: list[Shot] = []
     zero_shots: list[Shot] = []
     current_shot: Shot | None = None
+    current_advice: str = ""
 
     def _to_pie_data_multiple(self, *shots):
         return [
@@ -127,7 +130,17 @@ class PlayerState(OverviewState):
         self.current_shot = shot
 
     @rx.event
+    def change_advice(self, advice: Advice):
+        advice_path = path.join("assets/advices", f"{advice.type}.md")
+        if not path.exists(advice_path):
+            self.current_advice = "Mi spiace, **campione**.. Ora non sono disponibile."
+            return
+        self.current_advice = open(advice_path).read()
+
+    @rx.event
     def on_load(self):
+        if not self.match_stats:
+            return
         player_id = int(self.player_id)
         self.player_name = self.match.players_full[player_id]
         # player stats
@@ -169,10 +182,12 @@ class PlayerState(OverviewState):
         self.forehands = shot_stats(data, "forehands")
         self.backhands = shot_stats(data, "backhands")
         self.hands = self._to_pie_data_multiple(self.forehands, self.backhands)
-        self.advices = [
+        advices_data = [
             parse_advice(data)
             for data in self.match_insights.get("coach_advice")[player_id].get("advice")
         ]
+        self.advices = sorted(advices_data, key=lambda el: -el.relevance)[:2]
+
         # ---- page
         self.current_shot = self.serves
         info_shots = [
@@ -192,3 +207,4 @@ class PlayerState(OverviewState):
         ]
         self.info_shots = sorted(info_shots, key=lambda el: el.quality)
         self.zero_shots = [shot for shot in info_shots if shot.count == 0]
+        self.change_advice(self.advices[0])

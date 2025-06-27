@@ -1,10 +1,11 @@
 import reflex as rx
 from app.components.cards import card
 from app.components.charts import base_pie_chart
-from app.components.extra import page_loading, page_title
+from app.components.extra import page_title
 from app.components.shots import (base_item, deep_item, height_item,
                                   quality_item, velocity_item)
 from app.database.data import color_quality
+from app.pages.extra import match_not_found
 from app.pages.overview import info_item
 from app.states.overview import OverviewState
 from app.states.player_stats import PlayerState, Shot
@@ -76,11 +77,26 @@ def info_element(shot: Shot) -> rx.Component:
                 height_item("Altezza", shot.net_height),
                 velocity_item("Velocità media", shot.speed),
                 velocity_item("Velocità massima", shot.fastest, with_color=False),
+                width="100%",
+                max_width="30rem",
+                flex="1 1 45%",
             ),
             justify_content="space-evenly",
             width="100%",
+            wrap="wrap",
         ),
         width="100%",
+    )
+
+
+def advice_button(advice, index) -> rx.Component:
+    return rx.button(
+        f"Consiglio #{index+1}",
+        variant="soft",
+        color_scheme="gray",
+        cursor="pointer",
+        size="3",
+        on_click=PlayerState.change_advice(advice),
     )
 
 
@@ -135,6 +151,7 @@ def team_page() -> rx.Component:
                     wrap="wrap",
                 ),
                 width="100%",
+                flex="1 1 49%",
             ),
             card(
                 rx.hstack(
@@ -161,8 +178,10 @@ def team_page() -> rx.Component:
                     wrap="wrap",
                 ),
                 width="100%",
+                flex="1 1 49%",
             ),
             width="100%",
+            wrap="wrap",
         ),
         card(
             rx.vstack(
@@ -172,14 +191,17 @@ def team_page() -> rx.Component:
                     wrap="wrap",
                     align="center",
                 ),
-                rx.hstack(
-                    rx.text("Colpi ", rx.text.strong("non"), " eseguiti: "),
-                    rx.foreach(
-                        PlayerState.zero_shots,
-                        lambda shot: rx.badge(shot.name, color_scheme="gray"),
+                rx.cond(
+                    PlayerState.zero_shots,
+                    rx.hstack(
+                        rx.text("Colpi ", rx.text.strong("non"), " eseguiti: "),
+                        rx.foreach(
+                            PlayerState.zero_shots,
+                            lambda shot: rx.badge(shot.name, color_scheme="gray"),
+                        ),
+                        spacing="1",
+                        align="center",
                     ),
-                    spacing="1",
-                    align="center",
                 ),
                 rx.cond(
                     PlayerState.current_shot,
@@ -193,7 +215,36 @@ def team_page() -> rx.Component:
             ),
             width="100%",
         ),
+        card(
+            rx.vstack(
+                rx.hstack(
+                    rx.foreach(PlayerState.advices, advice_button),
+                    justify="end",
+                    width="100%",
+                ),
+                rx.divider(),
+                rx.markdown(
+                    PlayerState.current_advice,
+                    component_map={
+                        "h1": lambda text: rx.heading(
+                            text, size="6", margin_bottom="1rem"
+                        ),
+                        "h2": lambda text: rx.heading(text, size="5", margin_bottom=0),
+                        "p": lambda text: rx.text(text, margin_bottom=0),
+                        "blockquote": lambda text: rx.box(
+                            text,
+                            font_style="italic",
+                            bg=rx.color("gray", 4),
+                            padding="0.2rem 0.7rem",
+                            border_left="5px solid",
+                            border_color=rx.color("amber", 9),
+                        ),
+                    },
+                ),
+            ),
+            width="100%",
+        ),
         spacing="5",
         width="100%",
     )
-    return rx.cond(PlayerState.match, page, page_loading())
+    return rx.cond(OverviewState.is_match_found, page, match_not_found())

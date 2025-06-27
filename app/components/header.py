@@ -21,8 +21,15 @@ def header_button(text: str, icon: str, href: str) -> rx.Component:
 
 def header(state) -> rx.Component:
     return rx.hstack(
-        rx.hstack(
-            rx.icon("bar-chart-big"), rx.text("MPC Coach", size="7"), align="center"
+        rx.link(
+            rx.hstack(
+                rx.image(src="/logo/logo.png", width="2rem"),
+                rx.image(
+                    src="/logo/logo_text.png", height="2rem", display=hidden_mobile
+                ),
+                align="center",
+            ),
+            href="/",
         ),
         rx.hstack(
             header_button("Partite", "medal", "/matches"),

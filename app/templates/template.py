@@ -14,6 +14,13 @@ default_meta = [
         "name": "viewport",
         "content": "width=device-width, shrink-to-fit=no, initial-scale=1",
     },
+    {"property": "og:locale", "content": "it_IT"},
+    {"property": "og:site_name", "content": "Coach Dinky"},
+    {"property": "og:image", "content": "/images/coach_happy.webp"},
+    {"property": "og:image:type", "content": "image/webp"},
+    {"property": "og:image:width", "content": "1024"},
+    {"property": "og:image:height", "content": "1024"},
+    {"property": "og:image:alt", "content": "Coach Dinky"},
 ]
 
 

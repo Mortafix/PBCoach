@@ -441,6 +441,13 @@ def form_name() -> rx.Component:
     route="/upload",
     title="Upload",
     on_load=UploadState.on_load,
+    meta=[
+        {"property": "og:title", "content": "Statistiche per Coach Dink"},
+        {
+            "property": "og:description",
+            "content": "Carica le statistiche per il Coach Dinky",
+        },
+    ],
 )
 def home_page() -> rx.Component:
     return rx.cond(UploadState.uploaded, form_name(), form_upload())

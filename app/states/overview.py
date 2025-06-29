@@ -11,7 +11,6 @@ setlocale(LC_TIME, "it_IT.UTF-8")
 
 class OverviewState(State):
     is_match_found: bool
-    players: list[str] = []
     rally_total: int = 0
     rally_kitchen: int = 0
     rally_avg: float = 0
@@ -56,6 +55,14 @@ class OverviewState(State):
         ]
         self.wrost_misser = (missers.index(max(missers)), int(max(missers)))
         self.players_quality = [self.calculate_quality(data) for data in players_stats]
+
+    @rx.var
+    def players_description(self) -> str:
+        if not self.match:
+            return ""
+        team1 = " - ".join(self.match.players[index] for index in self.match.team1_idx)
+        team2 = " - ".join(self.match.players[index] for index in self.match.team2_idx)
+        return f"{team1} VS {team2}"
 
     @rx.event
     def calculate_quality(self, data):

@@ -104,6 +104,10 @@ def advice_button(advice, index) -> rx.Component:
     route="/[match_id]/player/[player_id]",
     title="Statistiche Giocatore",
     on_load=[OverviewState.on_load, PlayerState.on_load],
+    meta=[
+        {"property": "og:title", "content": PlayerState.match.name},
+        {"property": "og:description", "content": PlayerState.players_description},
+    ],
 )
 def team_page() -> rx.Component:
     page = rx.vstack(

@@ -8,6 +8,10 @@ from app.templates import template
     route="/players",
     title="Giocatori",
     on_load=MatchesState.on_load,
+    meta=[
+        {"property": "og:title", "content": "Giocatori del Coach Dinky"},
+        {"property": "og:description", "content": "Tutti i giocatori del Coach Dinky"},
+    ],
 )
 def matches_page() -> rx.Component:
     return rx.vstack(

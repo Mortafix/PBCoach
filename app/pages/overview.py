@@ -89,9 +89,14 @@ def player_quality(data, player_index):
     route="/[match_id]/overview",
     title="Match",
     on_load=OverviewState.on_load,
+    meta=[
+        {"property": "og:title", "content": OverviewState.match.name},
+        {"property": "og:description", "content": OverviewState.players_description},
+    ],
 )
 def home_page() -> rx.Component:
     page = rx.vstack(
+        rx.text(OverviewState.players_description),
         rx.cond(
             OverviewState.is_sidebar_open,
             page_title("medal", "Riepilogo"),
@@ -212,6 +217,13 @@ class RedirectCodeState(rx.State):
         return rx.redirect(f"/{self.match_id}/overview")
 
 
-@rx.page(route="/[match_id]", on_load=RedirectCodeState.go_to_page)
+@template(
+    route="/[match_id]",
+    on_load=RedirectCodeState.go_to_page,
+    meta=[
+        {"property": "og:title", "content": OverviewState.match.name},
+        {"property": "og:description", "content": OverviewState.players_description},
+    ],
+)
 def partenza():
     return rx.text("Redirecting...")

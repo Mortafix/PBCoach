@@ -76,6 +76,13 @@ def match_item(partita: Partita):
     route="/matches",
     title="Partite",
     on_load=MatchesState.on_load,
+    meta=[
+        {"property": "og:title", "content": "Partite del Coach Dinky"},
+        {
+            "property": "og:description",
+            "content": "Tutte le partite analizzate dal Coach Dinky",
+        },
+    ],
 )
 def matches_page() -> rx.Component:
     return rx.vstack(

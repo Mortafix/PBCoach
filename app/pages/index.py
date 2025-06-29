@@ -25,7 +25,15 @@ def background() -> rx.Component:
     )
 
 
-@template(route="/", title="Home", on_load=IndexState.on_load)
+@template(
+    route="/",
+    title="Home",
+    on_load=IndexState.on_load,
+    meta=[
+        {"property": "og:title", "content": "Coach Dinky platform"},
+        {"property": "og:description", "content": "Portale del Coach Dinky"},
+    ],
+)
 def index_page() -> rx.Component:
     return rx.vstack(
         background(),

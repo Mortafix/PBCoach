@@ -154,6 +154,10 @@ def thirds_item(team_idx, thirds_data, thirds_quality) -> rx.Component:
     route="/[match_id]/team",
     title="Statistiche Team",
     on_load=[OverviewState.on_load, TeamState.on_load],
+    meta=[
+        {"property": "og:title", "content": TeamState.match.name},
+        {"property": "og:description", "content": TeamState.players_description},
+    ],
 )
 def team_page() -> rx.Component:
     page = rx.vstack(

@@ -221,6 +221,7 @@ class RedirectCodeState(rx.State):
 @template(
     route="/[match_id]",
     on_load=RedirectCodeState.go_to_page,
+    description=f"{OverviewState.match.name} | {OverviewState.players_description}",
     meta=[
         {"property": "og:title", "content": OverviewState.match.name},
         {"property": "og:description", "content": OverviewState.players_description},

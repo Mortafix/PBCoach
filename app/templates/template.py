@@ -18,12 +18,12 @@ default_meta = [
     {"property": "og:site_name", "content": "Coach Dinky"},
     {
         "property": "og:image",
-        "content": "https://dinky.moris.dev/images/coach_happy.webp",
+        "content": "https://dinky.moris.dev/logo/logo.png",
     },
-    {"property": "og:image:type", "content": "image/webp"},
+    {"property": "og:image:type", "content": "image/png"},
     {"property": "og:image:width", "content": "1024"},
     {"property": "og:image:height", "content": "1024"},
-    {"property": "og:image:alt", "content": "Coach Dinky"},
+    {"property": "og:image:alt", "content": "Coach Dinky logo"},
 ]
 
 

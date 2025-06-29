@@ -396,6 +396,25 @@ def form_name() -> rx.Component:
                             justify_content=["center", "center", "justify"],
                             width="100%",
                         ),
+                        std_input(
+                            "medal",
+                            "Punteggio",
+                            rx.hstack(
+                                rx.input(
+                                    placeholder="Punteggio squadra 1",
+                                    type="number",
+                                    name="score1",
+                                    **field_style,
+                                ),
+                                rx.input(
+                                    placeholder="Punteggio squadra 2",
+                                    type="number",
+                                    name="score2",
+                                    **field_style,
+                                ),
+                                width="100%",
+                            ),
+                        ),
                         btn_text_icon(
                             "circle-plus",
                             "Inserisci dati",

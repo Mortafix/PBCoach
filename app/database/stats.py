@@ -41,6 +41,10 @@ def create_match(code, match_data, players_n):
         },
         "players_ids": players,
     }
+    stats_data["game"]["game_outcome"] = [
+        int(match_data.get("score1")),
+        int(match_data.get("score2")),
+    ]
     insights_data = load(open(path.join(base_client_dir, "insights.json")))
     if DB.stats.insert_one(stats_data):
         return DB.insights.insert_one(insights_data)

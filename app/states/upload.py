@@ -87,7 +87,16 @@ class UploadState(State):
                 return False
             return True
 
-        base_attrs = ["name", "date", "time", "match-type", "location", "location-type"]
+        base_attrs = [
+            "name",
+            "date",
+            "time",
+            "match-type",
+            "location",
+            "location-type",
+            "score1",
+            "score2",
+        ]
         if form_data.get("location-type") == "Outdoor":
             base_attrs += ["weather"]
         attrs = base_attrs + ["giocatore_1", "giocatore_3"]

@@ -88,7 +88,7 @@ def template(
 
         @rx.page(
             route=route,
-            title=f"PB Coach • {title}",
+            title=f"Coach Dinky • {title}",
             description=description,
             meta=all_meta,
             script_tags=script_tags,

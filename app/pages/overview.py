@@ -87,7 +87,7 @@ def player_quality(data, player_index):
 
 @template(
     route="/[match_id]/overview",
-    title="Home",
+    title="Match",
     on_load=OverviewState.on_load,
 )
 def home_page() -> rx.Component:
@@ -201,3 +201,17 @@ def home_page() -> rx.Component:
         width="100%",
     )
     return rx.cond(OverviewState.is_match_found, page, match_not_found())
+
+
+# ---- REDIRECT | only code
+
+
+class RedirectCodeState(rx.State):
+    @rx.event
+    def go_to_page(self):
+        return rx.redirect(f"/{self.match_id}/overview")
+
+
+@rx.page(route="/[match_id]", on_load=RedirectCodeState.go_to_page)
+def partenza():
+    return rx.text("Redirecting...")

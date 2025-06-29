@@ -102,7 +102,7 @@ def advice_button(advice, index) -> rx.Component:
 
 @template(
     route="/[match_id]/player/[player_id]",
-    title="Statistiche Team",
+    title="Statistiche Giocatore",
     on_load=[OverviewState.on_load, PlayerState.on_load],
 )
 def team_page() -> rx.Component:

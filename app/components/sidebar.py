@@ -154,10 +154,20 @@ def sidebar_menu_players(state) -> rx.Component:
 
 
 def sidebar_footer(state) -> rx.Component:
+    match_id = getattr(state, "match_id", None)
     footer_classic = rx.hstack(
         rx.vstack(
             rx.button(
-                rx.hstack(rx.text("Condivi la Partita"), rx.icon("share-2", size=18)),
+                rx.hstack(
+                    rx.text(
+                        "Condivi la Partita",
+                        on_click=[
+                            rx.set_clipboard(f"https://dinky.moris.dev/{match_id}"),
+                            rx.toast.success("Link alla partita copiato!"),
+                        ],
+                    ),
+                    rx.icon("share-2", size=18),
+                ),
                 align="center",
                 cursor="pointer",
                 variant="soft",

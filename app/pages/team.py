@@ -153,6 +153,7 @@ def thirds_item(team_idx, thirds_data, thirds_quality) -> rx.Component:
 @template(
     route="/[match_id]/team",
     title="Statistiche Team",
+    description=f"{OverviewState.match.name} | {OverviewState.players_description}",
     on_load=[OverviewState.on_load, TeamState.on_load],
     meta=[
         {"property": "og:title", "content": TeamState.match.name},

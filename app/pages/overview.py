@@ -88,6 +88,7 @@ def player_quality(data, player_index):
 @template(
     route="/[match_id]/overview",
     title="Match",
+    description=f"{OverviewState.match.name} | {OverviewState.players_description}",
     on_load=OverviewState.on_load,
     meta=[
         {"property": "og:title", "content": OverviewState.match.name},

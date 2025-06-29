@@ -16,7 +16,10 @@ default_meta = [
     },
     {"property": "og:locale", "content": "it_IT"},
     {"property": "og:site_name", "content": "Coach Dinky"},
-    {"property": "og:image", "content": "/images/coach_happy.webp"},
+    {
+        "property": "og:image",
+        "content": "https://dinky.moris.dev/images/coach_happy.webp",
+    },
     {"property": "og:image:type", "content": "image/webp"},
     {"property": "og:image:width", "content": "1024"},
     {"property": "og:image:height", "content": "1024"},

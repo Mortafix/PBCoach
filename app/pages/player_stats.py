@@ -103,6 +103,7 @@ def advice_button(advice, index) -> rx.Component:
 @template(
     route="/[match_id]/player/[player_id]",
     title="Statistiche Giocatore",
+    description=f"{OverviewState.match.name} | {OverviewState.players_description} | {PlayerState.player_name}",
     on_load=[OverviewState.on_load, PlayerState.on_load],
     meta=[
         {"property": "og:title", "content": PlayerState.match.name},

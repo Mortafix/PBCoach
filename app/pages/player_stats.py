@@ -224,8 +224,9 @@ def team_page() -> rx.Component:
             rx.vstack(
                 rx.hstack(
                     rx.foreach(PlayerState.advices, advice_button),
-                    justify="end",
+                    justify_content=["center", "center", "end", "end"],
                     width="100%",
+                    wrap="wrap",
                 ),
                 rx.divider(),
                 rx.hstack(

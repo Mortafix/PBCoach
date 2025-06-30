@@ -31,6 +31,7 @@ def info_item(name, icon, value, add_info="", spacing="0") -> rx.Component:
             rx.text(add_info, color_scheme="gray", size="6"),
             align="end",
             spacing=spacing,
+            text_align="center",
         ),
         align="center",
     )
@@ -97,7 +98,6 @@ def player_quality(data, player_index):
 )
 def home_page() -> rx.Component:
     page = rx.vstack(
-        rx.text(OverviewState.players_description),
         rx.cond(
             OverviewState.is_sidebar_open,
             page_title("medal", "Riepilogo"),
@@ -165,7 +165,7 @@ def home_page() -> rx.Component:
                 stat_item("Media colpi", "sigma", OverviewState.rally_avg),
                 stat_item("Rally più lungo", "maximize-2", OverviewState.rally_longest),
                 align="center",
-                justify="between",
+                justify_content="space-evenly",
                 width="100%",
                 wrap="wrap",
             ),

@@ -74,7 +74,7 @@ def info_element(shot: Shot) -> rx.Component:
                 deep_item(
                     "Profondità", shot.baseline_distance, reverse=shot.is_reverse_deep
                 ),
-                height_item("Altezza", shot.net_height),
+                height_item("Altezza dalla rete", shot.net_height),
                 velocity_item("Velocità media", shot.speed),
                 velocity_item("Velocità massima", shot.fastest, with_color=False),
                 width="100%",
@@ -127,7 +127,9 @@ def team_page() -> rx.Component:
                     "Tiri",
                     "flame",
                     PlayerState.shots,
-                    f"di {PlayerState.shots_total}",
+                    rx.cond(
+                        PlayerState.match.is_double, f"di {PlayerState.shots_total}", ""
+                    ),
                     spacing="1",
                 ),
                 info_item("Qualità", "shield-check", PlayerState.quality, "%"),

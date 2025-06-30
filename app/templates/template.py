@@ -108,6 +108,7 @@ def template(
             return rx.theme(
                 templated_page(),
                 has_background=True,
+                appearance="dark",
                 accent_color=ThemeState.accent_color,
                 gray_color=ThemeState.gray_color,
                 radius=ThemeState.radius,

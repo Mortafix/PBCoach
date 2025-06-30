@@ -7,6 +7,7 @@ def card(content, border=0, on_click=None, **attributes) -> rx.Component:
         size="4",
         border=border,
         style={"::after": {"box-shadow": "0 0 0 0"}, **attributes},
+        bg=rx.color_mode_cond(rx.color("gray", 4), "unset"),
         on_click=on_click,
     )
 

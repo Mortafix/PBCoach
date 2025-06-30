@@ -47,7 +47,7 @@ def index_page() -> rx.Component:
             ),
             padding="1rem 2rem",
             align="center",
-            bg="#1D1D1DEB",
+            bg=rx.color_mode_cond("#FFFFFF91", "#1D1D1DEB"),
         ),
         rx.button(
             rx.hstack(

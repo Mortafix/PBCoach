@@ -70,7 +70,7 @@ def get_all_matches(filters=None, sort=None, limit=10**10, parse=True):
 
 def get_months_matches(fmt="%B %y"):
     return {
-        format(date, "%m.%Y"): format(date, fmt)
+        format(date, "%m.%Y"): format(date, fmt).title()
         for match in DB.stats.find()
         if (date := match.get("info", {}).get("date"))
     }

@@ -1,9 +1,12 @@
 from datetime import datetime
+from locale import LC_TIME, setlocale
 
 import reflex as rx
 from app.database.connection import DB
 from app.database.locations import get_location_name
 from app.database.players import get_player_name
+
+setlocale(LC_TIME, "it_IT.UTF-8")
 
 
 class Partita(rx.Base):
@@ -63,3 +66,11 @@ def get_all_matches(filters=None, sort=None, limit=10**10, parse=True):
     if parse:
         return [parse_model(match) for match in matches]
     return matches
+
+
+def get_months_matches(fmt="%B %y"):
+    return {
+        format(date, "%m.%Y"): format(date, fmt)
+        for match in DB.stats.find()
+        if (date := match.get("info", {}).get("date"))
+    }

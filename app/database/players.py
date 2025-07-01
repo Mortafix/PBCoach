@@ -1,10 +1,23 @@
+import reflex as rx
 from app.database.connection import DB
 
 
-def get_all_players(filters=None, sort=None, limit=10**10, names=False):
+class Player(rx.Base):
+    id: int
+    name: str
+    surname: str
+
+
+def parse_model(data):
+    return Player(id=data.get("id"), name=data.get("name"), surname=data.get("surname"))
+
+
+def get_all_players(filters=None, sort=None, limit=10**10, names=False, parse=False):
     players = DB.players.find(filters, sort=sort or [("id", 1)], limit=limit)
     if names:
         return [f"{player.get('name')} {player.get('surname')}" for player in players]
+    if parse:
+        return [parse_model(player) for player in players]
     return list(players)
 
 

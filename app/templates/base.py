@@ -7,6 +7,8 @@ class State(rx.State):
     is_sidebar_open: bool = True
     is_sidebar_force_open: bool = False
     is_in_match: bool = False
+    expander_is_open: bool = False
+    selected_items: dict[str, list[str]] = {}
 
     # ---- PAGE
     current_page: str = "/"
@@ -36,6 +38,7 @@ class State(rx.State):
         self.is_sidebar_open = False
         self.is_in_match = False
         self.match = None
+        self.selected_items = {}
 
     @rx.event
     def toggle_sidebar(self):

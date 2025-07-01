@@ -1,10 +1,24 @@
+import reflex as rx
 from app.database.connection import DB
 
 
-def get_all_locations(filters=None, sort=None, limit=10**10, names=False):
+class Location(rx.Base):
+    id: str
+    name: str
+
+
+def parse_model(data):
+    return Location(id=data.get("id"), name=data.get("name"))
+
+
+def get_all_locations(
+    filters=None, sort=None, limit=10**10, names=False, parse=False
+):
     locations = DB.locations.find(filters, sort=sort or [("id", 1)], limit=limit)
     if names:
         return [location.get("name") for location in locations]
+    if parse:
+        return [parse_model(location) for location in locations]
     return list(locations)
 
 

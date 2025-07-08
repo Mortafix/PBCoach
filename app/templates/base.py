@@ -10,29 +10,15 @@ class State(rx.State):
     expander_is_open: bool = False
     selected_items: dict[str, list[str]] = {}
 
-    # ---- PAGE
-    current_page: str = "/"
-    previous_page: str = "/"
-
     # ---- MATCH
     match: Partita | None = None
     match_stats: dict = {}
     match_insights: dict = {}
 
-    # ---- VARS
-
-    @property
-    def current_url(self) -> str:
-        return self.router.url
-
     # ---- FUNCS
 
     @rx.event
     def on_load(self):
-        # update pages
-        if self.current_url != self.current_page:
-            self.previous_page = self.current_page
-            self.current_page = self.current_url
         self.is_header_open = True
         self.is_sidebar_force_open = False
         self.is_sidebar_open = False

@@ -3,9 +3,7 @@ from app.components.cards import card
 from app.components.chips import chips
 from app.components.expanders import expander
 from app.components.extra import page_title
-from app.components.input import btn_icon
 from app.components.player import player_item
-from app.components.selects import location_select, player_select
 from app.database.matches import Partita
 from app.states.matches import MatchesState
 from app.templates import template

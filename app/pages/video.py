@@ -1,6 +1,7 @@
 import reflex as rx
 from app.components.extra import page_title
 from app.components.input import btn_icon, btn_text_icon
+from app.pages.extra import match_not_found
 from app.states.overview import OverviewState
 from app.states.video import VideoState
 from app.templates import template
@@ -50,7 +51,7 @@ def highlight_button(data):
         icon_w=1.5,
         spacing="2",
         variant="solid",
-        on_click=lambda _: VideoState.go_to_rally(data[0]),
+        on_click=lambda: VideoState.go_to_rally(data[0]),
     )
 
 
@@ -64,9 +65,9 @@ def video_page():
     video_id = VideoState.match.video_id
     video_player = rx.vstack(
         rx.cond(
-            OverviewState.is_sidebar_open,
+            VideoState.is_sidebar_open,
             page_title("video", "Video della Partita"),
-            page_title("video", f"Video della Partita • {OverviewState.match.name}"),
+            page_title("video", f"Video della Partita • {VideoState.match.name}"),
         ),
         rx.box(
             rx.cond(
@@ -77,7 +78,7 @@ def video_page():
                     position="absolute",
                     top="0.5rem",
                     left="0.5rem",
-                    z_index=100,
+                    z_index=4,
                     padding="0.15rem 0.6rem",
                 ),
             ),
@@ -166,4 +167,8 @@ def video_page():
         ),
         width="100%",
     )
-    return rx.cond(video_id, video_player, no_video())
+    return rx.cond(
+        OverviewState.is_match_found,
+        rx.cond(video_id, video_player, no_video()),
+        match_not_found(),
+    )

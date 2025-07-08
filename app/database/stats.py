@@ -38,6 +38,7 @@ def create_match(code, match_data, players_n):
             "location": int(match_data.get("location")),
             "location-type": match_data.get("location-type"),
             "weather": match_data.get("weather"),
+            "video": match_data.get("video-id"),
         },
         "players_ids": players,
     }

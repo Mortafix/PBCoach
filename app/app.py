@@ -3,7 +3,7 @@ from app import styles
 from app.components.header import header
 from app.components.sidebar import sidebar
 from app.pages import (extra, index, matches, overview, player_stats, players,
-                       team, upload)
+                       team, upload, video)
 
 app = rx.App(
     style=styles.base_style,

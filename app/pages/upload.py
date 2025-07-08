@@ -359,6 +359,15 @@ def form_name() -> rx.Component:
                                 ),
                             ),
                         ),
+                        std_input(
+                            "video",
+                            "Video ID",
+                            rx.input(
+                                placeholder="Video ID da pb.vision [opzionale]",
+                                name="video-id",
+                                **field_style,
+                            ),
+                        ),
                         form_divider("users", "Squadre"),
                         rx.hstack(
                             rx.text("Se non trovi un ", rx.code("giocatore"), ":"),

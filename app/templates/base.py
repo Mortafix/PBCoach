@@ -23,7 +23,7 @@ class State(rx.State):
 
     @property
     def current_url(self) -> str:
-        return self.router.page.path
+        return self.router.url
 
     # ---- FUNCS
 

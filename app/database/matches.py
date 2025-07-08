@@ -29,6 +29,7 @@ class Partita(rx.Base):
     team2_idx: list[int]
     win_team1: bool
     is_double: bool = True
+    video_id: str | None = None
 
 
 def parse_model(data):
@@ -58,6 +59,7 @@ def parse_model(data):
         team2_idx=[2, 3] if players_n == 4 else [1],
         win_team1=score[0] > score[1],
         is_double=players_n == 4,
+        video_id=data.get("info").get("video"),
     )
 
 

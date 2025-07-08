@@ -73,6 +73,9 @@ def sidebar_menu(state) -> rx.Component:
     menu_classic = rx.vstack(
         nav_item("home", "Riepilogo Partita", "/overview"),
         nav_item("users", "Statistiche Team", "/team"),
+        rx.cond(
+            state.match.video_id, nav_item("video", "Video Partita", "/video"), None
+        ),
         spacing="1",
         width="100%",
         padding_left="1em",
@@ -81,6 +84,7 @@ def sidebar_menu(state) -> rx.Component:
     menu_minimize = rx.vstack(
         nav_item_icon("home", "/overview"),
         nav_item_icon("users", "/team"),
+        rx.cond(state.match.video_id, nav_item_icon("video", "/video"), None),
         spacing="1",
         width="100%",
         align="center",

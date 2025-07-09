@@ -1,6 +1,7 @@
 from random import choice
 
 import reflex as rx
+from app.components.input import btn_text_icon
 from app.database.connection import DB
 
 
@@ -48,4 +49,21 @@ def form_divider(icon, title):
         rx.divider(),
         align="center",
         width="100%",
+    )
+
+
+def page_link(title, href):
+    return rx.link(
+        btn_text_icon(
+            "arrow-up-right",
+            title,
+            icon_size=20,
+            spacing="1",
+            icon_w=2,
+            variant="soft",
+            color_scheme="gold",
+            reverse=True,
+        ),
+        href=href,
+        cursor="pointer",
     )

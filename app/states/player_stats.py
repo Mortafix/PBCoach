@@ -208,3 +208,10 @@ class PlayerState(OverviewState):
         self.info_shots = sorted(info_shots, key=lambda el: el.quality)
         self.zero_shots = [shot for shot in info_shots if shot.count == 0]
         self.change_advice(self.advices[0])
+
+
+class PlayersState(OverviewState):
+    @rx.event
+    def on_load(self):
+        if not self.match_stats:
+            return

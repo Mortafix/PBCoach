@@ -1,14 +1,15 @@
 import reflex as rx
 from app.components.cards import card
 from app.components.charts import base_pie_chart
-from app.components.extra import page_title
+from app.components.extra import page_link, page_title
+from app.components.input import btn_text_icon
 from app.components.shots import (base_item, deep_item, height_item,
                                   quality_item, velocity_item)
 from app.database.data import color_quality
 from app.pages.extra import match_not_found
 from app.pages.overview import info_item
 from app.states.overview import OverviewState
-from app.states.player_stats import PlayerState, Shot
+from app.states.player_stats import PlayersState, PlayerState, Shot
 from app.templates import template
 
 
@@ -267,7 +268,95 @@ def team_page() -> rx.Component:
             ),
             width="100%",
         ),
+        rx.divider(),
+        rx.hstack(
+            page_link("Riepilogo della Partita", f"/{PlayerState.match_id}/overview"),
+            page_link("Statistiche dei Team", f"/{PlayerState.match_id}/team"),
+            page_link("Statistiche dei Giocatori", f"/{PlayerState.match_id}/players"),
+            page_link("Video della Partita", f"/{PlayerState.match_id}/video"),
+            width="100%",
+            wrap="wrap",
+        ),
         spacing="5",
         width="100%",
     )
-    return rx.cond(OverviewState.is_match_found, page, match_not_found())
+    return rx.cond(PlayerState.is_match_found, page, match_not_found())
+
+
+# ---- Players selection
+
+
+def player_card(name, index) -> rx.Component:
+    player_id = PlayersState.match.players_ids[index]
+    is_opponent = rx.cond(PlayersState.match.is_double, index >= 2, index >= 1)
+    color = rx.cond(is_opponent, "tomato", "indigo")
+    return card(
+        rx.vstack(
+            rx.code(name, size="6", color_scheme=color),
+            rx.avatar(
+                src=f"/players/{player_id}.jpg",
+                radius="full",
+                fallback=name[:2],
+                border="4px solid white",
+                border_color=rx.color(color, 6),
+                size="7",
+                color_scheme=color,
+            ),
+            btn_text_icon(
+                "move-right",
+                "Statistiche",
+                icon_size=20,
+                spacing="1",
+                icon_w=2,
+                variant="soft",
+                color_scheme="gray",
+                reverse=True,
+                width="100%",
+            ),
+            spacing="4",
+            width="100%",
+            align="center",
+            justify="center",
+        ),
+        flex=["100%", "100%", "45%", "45%", "20%", "20%"],
+        cursor="pointer",
+        border="2px solid transparent",
+        _hover={"border": "2px solid", "border-color": rx.color("amber", 9)},
+        on_click=rx.redirect(f"/{PlayersState.match.code}/player/{index}"),
+    )
+
+
+@template(
+    route="/[match_id]/players",
+    title="Statistiche dei Giocatori",
+    description="Analisi del Coach Dinky dei giocatori della partita",
+    on_load=[OverviewState.on_load, PlayersState.on_load],
+)
+def players_selection() -> rx.Component:
+    page = rx.vstack(
+        rx.cond(
+            PlayersState.is_sidebar_open,
+            page_title("users", "Selezione dei Giocatori"),
+            page_title(
+                "users",
+                f"Selezione dei Giocatori • {PlayersState.match.name}",
+            ),
+        ),
+        rx.hstack(
+            rx.foreach(PlayersState.match.players, player_card),
+            width="100%",
+            justify_content="space-evenly",
+            wrap="wrap",
+        ),
+        rx.divider(),
+        rx.hstack(
+            page_link("Riepilogo della Partita", f"/{PlayersState.match_id}/overview"),
+            page_link("Statistiche dei Team", f"/{PlayersState.match_id}/team"),
+            page_link("Video della Partita", f"/{PlayersState.match_id}/video"),
+            width="100%",
+            wrap="wrap",
+        ),
+        spacing="5",
+        width="100%",
+    )
+    return rx.cond(PlayersState.is_match_found, page, match_not_found())

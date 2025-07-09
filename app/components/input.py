@@ -45,12 +45,21 @@ def btn_icon(icon, icon_size=16, icon_w=3, **params):
 
 
 def btn_text_icon(
-    icon, text="", text_size="3", icon_size=16, icon_w=3, spacing="3", **params
+    icon,
+    text="",
+    text_size="3",
+    icon_size=16,
+    icon_w=3,
+    spacing="3",
+    reverse=False,
+    **params
 ):
+    icon_component = rx.icon(icon, size=icon_size, stroke_width=icon_w)
     return rx.button(
         rx.hstack(
-            rx.icon(icon, size=icon_size, stroke_width=icon_w),
+            rx.cond(reverse, None, icon_component),
             rx.text(text, size=text_size),
+            rx.cond(reverse, icon_component),
             align="center",
             spacing=spacing,
         ),

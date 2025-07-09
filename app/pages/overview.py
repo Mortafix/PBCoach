@@ -1,6 +1,6 @@
 import reflex as rx
 from app.components.cards import card
-from app.components.extra import page_title
+from app.components.extra import page_link, page_title
 from app.components.player import player_item
 from app.components.shots import base_item, quality_item
 from app.database.data import color_quality, shots_name_italian
@@ -202,6 +202,16 @@ def home_page() -> rx.Component:
                 wrap="wrap",
             ),
             width="100%",
+        ),
+        rx.divider(),
+        rx.hstack(
+            page_link("Statistiche dei Team", f"/{OverviewState.match_id}/team"),
+            page_link(
+                "Statistiche dei Giocatori", f"/{OverviewState.match_id}/players"
+            ),
+            page_link("Video della Partita", f"/{OverviewState.match_id}/video"),
+            width="100%",
+            wrap="wrap",
         ),
         spacing="5",
         width="100%",

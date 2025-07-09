@@ -1,7 +1,7 @@
 import reflex as rx
 from app.components.cards import card
 from app.components.charts import base_pie_chart
-from app.components.extra import page_title
+from app.components.extra import page_link, page_title
 from app.components.player import player_item
 from app.components.shots import custom_item, deep_item, quality_item
 from app.database.data import color_quality
@@ -260,7 +260,15 @@ def team_page() -> rx.Component:
             width="100%",
             wrap="wrap",
         ),
+        rx.divider(),
+        rx.hstack(
+            page_link("Riepilogo della Partita", f"/{TeamState.match_id}/overview"),
+            page_link("Statistiche dei Giocatori", f"/{TeamState.match_id}/players"),
+            page_link("Video della Partita", f"/{TeamState.match_id}/video"),
+            width="100%",
+            wrap="wrap",
+        ),
         spacing="5",
         width="100%",
     )
-    return rx.cond(OverviewState.is_match_found, page, match_not_found())
+    return rx.cond(TeamState.is_match_found, page, match_not_found())

@@ -1,5 +1,5 @@
 import reflex as rx
-from app.components.extra import page_title
+from app.components.extra import page_link, page_title
 from app.components.input import btn_icon, btn_text_icon
 from app.pages.extra import match_not_found
 from app.states.overview import OverviewState
@@ -165,10 +165,18 @@ def video_page():
                 width="100%",
             ),
         ),
+        rx.divider(),
+        rx.hstack(
+            page_link("Riepilogo della Partita", f"/{VideoState.match_id}/overview"),
+            page_link("Statistiche dei Team", f"/{VideoState.match_id}/team"),
+            page_link("Statistiche dei Giocatori", f"/{VideoState.match_id}/players"),
+            width="100%",
+            wrap="wrap",
+        ),
         width="100%",
     )
     return rx.cond(
-        OverviewState.is_match_found,
+        VideoState.is_match_found,
         rx.cond(video_id, video_player, no_video()),
         match_not_found(),
     )

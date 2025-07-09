@@ -5,6 +5,5 @@ config = rx.Config(
     loglevel="default",
     show_built_with_reflex=False,
     is_reflex_cloud=False,
-    # tailwind=None,
-    plugins=[rx.plugins.TailwindV3Plugin()],
+    plugins=[rx.plugins.SitemapPlugin(), rx.plugins.TailwindV4Plugin()],
 )

@@ -287,7 +287,7 @@ def team_page() -> rx.Component:
 
 
 def player_card(name, index) -> rx.Component:
-    player_id = PlayersState.match.players_ids[index]
+    player_id = PlayersState.match.players_full_ids[index]
     is_opponent = rx.cond(PlayersState.match.is_double, index >= 2, index >= 1)
     color = rx.cond(is_opponent, "tomato", "indigo")
     player_card = card(

@@ -19,6 +19,7 @@ class MatchesState(State):
 
     @rx.event
     def on_load(self):
+        self.is_hamburger_visible = False
         filters = self.build_filters()
         self.matches = get_all_matches(filters, sort=[("info.date", -1)])
         self.players = [

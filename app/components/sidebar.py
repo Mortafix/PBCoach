@@ -18,7 +18,6 @@ def sidebar_minimize(state) -> rx.Component:
         top=10,
         right=rx.cond(state.is_sidebar_open, 15, 25),
         padding=0,
-        display=["none", "block", "block", "block"],
     )
 
 
@@ -204,7 +203,9 @@ def sidebar_footer(state) -> rx.Component:
 def sidebar(state) -> rx.Component:
     sidebar_elem = rx.flex(
         rx.vstack(
-            sidebar_minimize(state),
+            rx.tablet_and_desktop(
+                sidebar_minimize(state),
+            ),
             sidebar_header(state),
             rx.cond(state.is_sidebar_open, rx.divider()),
             sidebar_menu(state),

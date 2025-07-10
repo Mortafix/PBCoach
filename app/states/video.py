@@ -47,6 +47,7 @@ class VideoState(OverviewState):
             highlights_name[name] = highlights_name.get(name, 0) + 1
             highlight = (event.get("rally_idx") + 1, f"{name} #{name_idx}", icon_name)
             self.highlights.append(highlight)
+        self.go_to_rally(1)
 
     @rx.var
     def current_rally(self) -> int:
@@ -109,5 +110,5 @@ class VideoState(OverviewState):
 
     @rx.event
     def go_to_rally(self, rally_n):
-        start_rally = self.rallies[rally_n - 1][0]
+        start_rally = self.rallies[max(rally_n - 1, 0)][0]
         return self.go_to(start_rally)

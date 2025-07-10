@@ -4,6 +4,7 @@ from app.database.matches import Partita
 
 class State(rx.State):
     is_header_open: bool = True
+    is_hamburger_visible: bool = True
     is_sidebar_open: bool = True
     is_sidebar_force_open: bool = False
     is_in_match: bool = False
@@ -20,6 +21,7 @@ class State(rx.State):
     @rx.event
     def on_load(self):
         self.is_header_open = True
+        self.is_hamburger_visible = True
         self.is_sidebar_force_open = False
         self.is_sidebar_open = False
         self.is_in_match = False

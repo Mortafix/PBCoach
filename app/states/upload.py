@@ -24,6 +24,7 @@ class UploadState(State):
 
     @rx.event
     def on_load(self):
+        self.is_hamburger_visible = False
         self.player_name = ""
         self.player_surname = ""
         self.uploaded = False

@@ -3,6 +3,7 @@ from app.components.cards import card
 from app.components.chips import chips
 from app.components.expanders import expander
 from app.components.extra import page_title
+from app.components.input import btn_text_icon
 from app.components.player import player_item
 from app.database.matches import Partita
 from app.states.matches import MatchesState
@@ -114,6 +115,11 @@ def filters_block(state) -> rx.Component:
                 "type",
             ),
         ),
+        filter_item(
+            "user-search",
+            "Mopdalità di Gioco",
+            chips(state, {2: "Singolo", 4: "Doppio"}, "mode"),
+        ),
         filter_item("users", "Giocatori", chips(state, state.players, "players")),
         filter_item(
             "calendar", "Data della partita", chips(state, state.months, "months")
@@ -139,7 +145,23 @@ def matches_page() -> rx.Component:
     return rx.vstack(
         page_title("medal", "Partite"),
         expander(
-            rx.hstack(rx.icon("sliders-horizontal"), rx.text("Filtri"), align="center"),
+            rx.hstack(
+                rx.icon("sliders-horizontal"),
+                rx.text("Filtri"),
+                rx.cond(
+                    MatchesState.are_filters_set,
+                    btn_text_icon(
+                        "x",
+                        "Rimuovi Filtri",
+                        text_size="2",
+                        spacing="1",
+                        variant="soft",
+                        color_scheme="red",
+                        on_click=MatchesState.reset_filters,
+                    ),
+                ),
+                align="center",
+            ),
             filters_block(MatchesState),
             width="100%",
             padding_inline="1rem",

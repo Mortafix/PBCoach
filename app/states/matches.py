@@ -16,12 +16,13 @@ class MatchesState(State):
     players: list[tuple[int, str]] = []
     locations: list[tuple[int, str]] = []
     months: list[tuple[str, str]] = []
+    are_filters_set: bool = False
 
     @rx.event
     def on_load(self):
+        self.are_filters_set = False
         self.is_hamburger_visible = False
-        filters = self.build_filters()
-        self.matches = get_all_matches(filters, sort=[("info.date", -1)])
+        self.matches = get_all_matches(sort=[("info.date", -1)])
         self.players = [
             (int(player.id), get_player_name(player.id))
             for player in get_all_players(sort=[("name", 1)], parse=True)
@@ -53,7 +54,18 @@ class MatchesState(State):
             },
             "info.location-type": {"$in": list(self.selected_items.get("field", []))},
             "info.type": {"$in": list(self.selected_items.get("type", []))},
+            "session.num_players": {
+                "$in": [int(el) for el in self.selected_items.get("mode", [])]
+            },
         }
         if date_filter:
             filters["$or"] = date_filter
-        return {key: val for key, val in filters.items() if key == "$or" or val["$in"]}
+        filters = {key: el for key, el in filters.items() if key == "$or" or el["$in"]}
+        self.are_filters_set = bool(filters)
+        return filters
+
+    @rx.event
+    def reset_filters(self):
+        self.selected_items.clear()
+        self.are_filters_set = False
+        self.matches = get_all_matches(sort=[("info.date", -1)])

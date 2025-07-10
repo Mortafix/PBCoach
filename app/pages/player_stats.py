@@ -290,7 +290,7 @@ def player_card(name, index) -> rx.Component:
     player_id = PlayersState.match.players_ids[index]
     is_opponent = rx.cond(PlayersState.match.is_double, index >= 2, index >= 1)
     color = rx.cond(is_opponent, "tomato", "indigo")
-    return card(
+    player_card = card(
         rx.vstack(
             rx.code(name, size="6", color_scheme=color),
             rx.avatar(
@@ -324,6 +324,7 @@ def player_card(name, index) -> rx.Component:
         _hover={"border": "2px solid", "border-color": rx.color("amber", 9)},
         on_click=rx.redirect(f"/{PlayersState.match.code}/player/{index}"),
     )
+    return rx.cond(name, player_card, None)
 
 
 @template(
@@ -343,7 +344,7 @@ def players_selection() -> rx.Component:
             ),
         ),
         rx.hstack(
-            rx.foreach(PlayersState.match.players, player_card),
+            rx.foreach(PlayersState.match.players_full, player_card),
             width="100%",
             justify_content="space-evenly",
             wrap="wrap",

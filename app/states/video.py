@@ -7,6 +7,7 @@ from reflex.utils.format import format_ref
 class VideoState(OverviewState):
     current_seconds: float = 0
     show_scoreboard: bool = True
+    with_score: bool = True
     skipping: bool = True
     rallies_score: list[tuple[int, int]] = []
     rallies: list[tuple[float, float]] = []
@@ -20,6 +21,9 @@ class VideoState(OverviewState):
             for rally in self.match_insights.get("rallies")
             if (rally_score := rally.get("scoring_info", {}).get("running_score"))
         ]
+        self.with_score = True
+        if not self.rallies_score:
+            self.with_score = False
         self.rallies = [
             (rally.get("start_ms") / 1000, rally.get("end_ms") / 1000)
             for rally in self.match_insights.get("rallies")

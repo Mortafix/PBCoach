@@ -71,7 +71,7 @@ def video_page():
         ),
         rx.box(
             rx.cond(
-                VideoState.show_scoreboard,
+                VideoState.with_score & VideoState.show_scoreboard,
                 rx.box(
                     scoreboard(),
                     bg="#000000bf",
@@ -111,19 +111,22 @@ def video_page():
                 align="center",
             ),
             rx.hstack(
-                rx.hstack(
-                    rx.text("Punteggio"),
-                    rx.switch(
-                        size="3",
-                        color_scheme="green",
-                        cursor="pointer",
-                        checked=VideoState.show_scoreboard,
-                        on_change=VideoState.set_show_scoreboard,
+                rx.cond(
+                    VideoState.with_score,
+                    rx.hstack(
+                        rx.text("Punteggio"),
+                        rx.switch(
+                            size="3",
+                            color_scheme="green",
+                            cursor="pointer",
+                            checked=VideoState.show_scoreboard,
+                            on_change=VideoState.set_show_scoreboard,
+                        ),
+                        align="center",
+                        padding="0.25rem 0.5rem",
+                        border_radius="0.5rem",
+                        bg=rx.color_mode_cond("#f3f3f3", "#18191b"),
                     ),
-                    align="center",
-                    padding="0.25rem 0.5rem",
-                    border_radius="0.5rem",
-                    bg=rx.color_mode_cond("#f3f3f3", "#18191b"),
                 ),
                 rx.hstack(
                     rx.text("Solo partita"),

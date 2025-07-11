@@ -71,7 +71,9 @@ def player_item(giocatore: Player):
                         "Qualità",
                         content=rx.hstack(
                             rx.code(
-                                f"{quality}%", size="5", color=color_quality(quality)
+                                f"{quality}%",
+                                size="5",
+                                color_scheme=color_quality(quality),
                             ),
                             rx.cond(
                                 partite_giocate > 1,

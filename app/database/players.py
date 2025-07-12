@@ -51,7 +51,9 @@ def get_players_general_stats():
     played = dict()
     qualities = dict()
     qualities_hist = dict()
-    for match in DB.stats.find(sort=[("info.date", 1)]):
+    for match in DB.stats.find(
+        {"info.type": {"$ne": "Allenamento"}}, sort=[("info.date", 1)]
+    ):
         players_stats = [stats for stats in match.get("players") if stats]
         players_ids = match.get("players_ids")
         for player in players_ids:

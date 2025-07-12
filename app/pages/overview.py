@@ -120,7 +120,7 @@ def home_page() -> rx.Component:
                     rx.text("-", size="8", weigth="bold", opacity=0.5),
                     rx.text(OverviewState.match.score[1], size="9", weigth="bold"),
                     rx.cond(
-                        ~OverviewState.match.win_team1,
+                        OverviewState.match.win_team2,
                         rx.icon("trophy", size=30, color=rx.color("amber", 9)),
                     ),
                     spacing="3",

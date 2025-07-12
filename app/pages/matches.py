@@ -50,7 +50,7 @@ def match_item(partita: Partita):
                 rx.text("-", size="8", weigth="bold", opacity=0.5),
                 rx.text(partita.score[1], size="8", weigth="bold"),
                 rx.cond(
-                    ~partita.win_team1,
+                    partita.win_team2,
                     rx.icon("trophy", size=24, color=rx.color("amber", 9)),
                 ),
                 spacing="3",

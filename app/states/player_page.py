@@ -13,7 +13,7 @@ class PlayerPage(rx.Base):
     matches: int
     matches_won: int
     allenamenti: int
-    teammates: dict[int, int]
+    teammates: list[tuple[int, int]]
     teammates_name: dict[int, str]
     distance: int
     distance_str: str
@@ -90,15 +90,15 @@ def parse_model(matches, won, allenamenti, teammates, data):
         matches=matches,
         matches_won=sum(won),
         allenamenti=allenamenti,
-        teammates={
-            player: teammates.get(player)
-            for player in sorted(teammates, key=lambda el: -teammates.get(el))[:3]
-        },
+        teammates=[
+            (player, teammates.get(player))
+            for player in sorted(teammates, key=lambda el: (-teammates.get(el), el))[:3]
+        ],
         teammates_name={player: get_player_name(player) for player in teammates},
         distance=distance,
-        distance_str=f"{distance/1000:.2f} km"
-        if distance > 1000
-        else f"{distance:.0f} m",
+        distance_str=(
+            f"{distance/1000:.2f} km" if distance > 1000 else f"{distance:.0f} m"
+        ),
         quality=data.get("quality"),
         finals=data.get("finals"),
         errors=data.get("errors"),
@@ -118,9 +118,11 @@ def parse_model(matches, won, allenamenti, teammates, data):
         returns_kitchen=data.get("returns_kitchen"),
         shots_aggressive=data.get("shots_aggressive"),
         shots_defensive=data.get("shots_defensive"),
-        player_type="Bilanciato"
-        if shots_type_diff / shots_count < 0.1
-        else ["Difensivo", "Aggressivo"][shots_type_diff > 0],
+        player_type=(
+            "Bilanciato"
+            if shots_type_diff / shots_count < 0.1
+            else ["Difensivo", "Aggressivo"][shots_type_diff > 0]
+        ),
         rallies_total=data.get("rallies_total"),
         rallies_won=data.get("rallies_won"),
         pie_matches=to_pie_base(
@@ -169,9 +171,11 @@ class PlayerState(State):
         ]
         teammates = Counter(teammates_history)
         matches_won = [
-            match.win_team1
-            if match.players_ids.index(player_id) in match.team1_idx
-            else match.win_team2
+            (
+                match.win_team1
+                if match.players_ids.index(player_id) in match.team1_idx
+                else match.win_team2
+            )
             for match in matches
             if not match.is_allenamento
         ]

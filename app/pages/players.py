@@ -98,11 +98,13 @@ def player_item(giocatore: Player):
             justify="center",
         ),
         flex=["100%", "100%", "45%", "30%", "20%", "17%"],
-        cursor="pointer",
+        cursor=rx.cond(partite_giocate > 0, "pointer", "deafult"),
         max_width="28rem",
         border="2px solid transparent",
         _hover={"border": "2px solid", "border-color": rx.color("amber", 9)},
-        on_click=rx.redirect(f"/player/{giocatore.id}"),
+        on_click=rx.cond(
+            partite_giocate > 0, rx.redirect(f"/player/{giocatore.id}"), None
+        ),
     )
 
 
@@ -115,7 +117,7 @@ def player_item(giocatore: Player):
         {"property": "og:description", "content": "Tutti i giocatori del Coach Dinky"},
     ],
 )
-def matches_page() -> rx.Component:
+def players_page() -> rx.Component:
     return rx.vstack(
         page_title("users", "Giocatori"),
         rx.hstack(

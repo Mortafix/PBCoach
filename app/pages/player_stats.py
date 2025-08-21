@@ -102,7 +102,7 @@ def advice_button(advice, index) -> rx.Component:
 
 
 @template(
-    route="/[match_id]/player/[player_id]",
+    route="/match/[match_id]/player/[player_id]",
     title="Statistiche Giocatore",
     description="Analisi del Coach Dinky di un giocatore della partita",
     on_load=[OverviewState.on_load, PlayerState.on_load],
@@ -270,10 +270,14 @@ def team_page() -> rx.Component:
         ),
         rx.divider(),
         rx.hstack(
-            page_link("Riepilogo della Partita", f"/{PlayerState.match_id}/overview"),
-            page_link("Statistiche dei Team", f"/{PlayerState.match_id}/team"),
-            page_link("Statistiche dei Giocatori", f"/{PlayerState.match_id}/players"),
-            page_link("Video della Partita", f"/{PlayerState.match_id}/video"),
+            page_link(
+                "Riepilogo della Partita", f"/match/{PlayerState.match_id}/overview"
+            ),
+            page_link("Statistiche dei Team", f"/match/{PlayerState.match_id}/team"),
+            page_link(
+                "Statistiche dei Giocatori", f"/match/{PlayerState.match_id}/players"
+            ),
+            page_link("Video della Partita", f"/match/{PlayerState.match_id}/video"),
             width="100%",
             wrap="wrap",
         ),
@@ -322,13 +326,13 @@ def player_card(name, index) -> rx.Component:
         cursor="pointer",
         border="2px solid transparent",
         _hover={"border": "2px solid", "border-color": rx.color("amber", 9)},
-        on_click=rx.redirect(f"/{PlayersState.match.code}/player/{index}"),
+        on_click=rx.redirect(f"/match/{PlayersState.match.code}/player/{index}"),
     )
     return rx.cond(name, player_card, None)
 
 
 @template(
-    route="/[match_id]/players",
+    route="/match/[match_id]/players",
     title="Statistiche dei Giocatori",
     description="Analisi del Coach Dinky dei giocatori della partita",
     on_load=[OverviewState.on_load, PlayersState.on_load],
@@ -351,9 +355,11 @@ def players_selection() -> rx.Component:
         ),
         rx.divider(),
         rx.hstack(
-            page_link("Riepilogo della Partita", f"/{PlayersState.match_id}/overview"),
-            page_link("Statistiche dei Team", f"/{PlayersState.match_id}/team"),
-            page_link("Video della Partita", f"/{PlayersState.match_id}/video"),
+            page_link(
+                "Riepilogo della Partita", f"/match/{PlayersState.match_id}/overview"
+            ),
+            page_link("Statistiche dei Team", f"/match/{PlayersState.match_id}/team"),
+            page_link("Video della Partita", f"/match/{PlayersState.match_id}/video"),
             width="100%",
             wrap="wrap",
         ),

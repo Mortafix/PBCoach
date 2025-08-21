@@ -57,7 +57,7 @@ def highlight_button(data):
 
 @template(
     title="Video",
-    route="/[match_id]/video",
+    route="/match/[match_id]/video",
     on_load=[OverviewState.on_load, VideoState.on_load],
     description="Video della partita",
 )
@@ -170,9 +170,13 @@ def video_page():
         ),
         rx.divider(),
         rx.hstack(
-            page_link("Riepilogo della Partita", f"/{VideoState.match_id}/overview"),
-            page_link("Statistiche dei Team", f"/{VideoState.match_id}/team"),
-            page_link("Statistiche dei Giocatori", f"/{VideoState.match_id}/players"),
+            page_link(
+                "Riepilogo della Partita", f"/match/{VideoState.match_id}/overview"
+            ),
+            page_link("Statistiche dei Team", f"/match/{VideoState.match_id}/team"),
+            page_link(
+                "Statistiche dei Giocatori", f"/match/{VideoState.match_id}/players"
+            ),
             width="100%",
             wrap="wrap",
         ),

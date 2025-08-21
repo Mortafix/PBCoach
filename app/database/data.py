@@ -83,3 +83,26 @@ def highlights_icons(event):
     if "firefight" in event:
         return "flame"
     return "sparkles"
+
+
+# ---- SINGLE SHOTS
+
+SINGLE_SHOTS = [
+    "serves",
+    "returns",
+    "drives",
+    "drops",
+    "dinks",
+    "lobs",
+    "smashes",
+    "third_drives",
+    "third_drops",
+    "third_lobs",
+    "resets",
+    "speedups",
+    "passing",
+    "poaches",
+]
+
+AGGRESSIVE_SHOTS = ["drives", "poaches", "third_drives", "speedups", "poaches"]
+DEFENSIVE_SHOTS = ["drops", "dinks", "third_drops", "resets", "lobs"]

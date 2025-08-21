@@ -45,7 +45,7 @@ def sidebar_menu(state) -> rx.Component:
                 rx.text(text, size="5", weight=rx.cond(is_active, "bold", "regular")),
                 align="center",
             ),
-            href=f"/{match_id}{href}",
+            href=f"/match/{match_id}{href}",
             underline="none",
             color=rx.color("white", 7),
             padding="0.25em 0.7em",
@@ -59,7 +59,7 @@ def sidebar_menu(state) -> rx.Component:
         is_active = rx.State.router.page.path.split("/")[-1] == href[1:]
         return rx.link(
             rx.icon(icon, size=22, stroke_width=rx.cond(is_active, 2.5, 2)),
-            href=f"/{match_id}{href}",
+            href=f"/match/{match_id}{href}",
             underline="none",
             color=rx.color("white", 7),
             padding="0.4em 0.4em",
@@ -115,7 +115,7 @@ def sidebar_menu_players(state) -> rx.Component:
                 ),
                 align="center",
             ),
-            href=f"/{match_id}/player/{idx}",
+            href=f"/match/{match_id}/player/{idx}",
             underline="none",
             padding=rx.cond(state.is_sidebar_open, "0.4rem 0.8rem", "0.25rem 0.25rem"),
             border_radius="1em",

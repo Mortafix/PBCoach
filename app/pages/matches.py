@@ -71,7 +71,7 @@ def match_item(partita: Partita):
         border="2px solid transparent",
         cursor="pointer",
         _hover={"border": "2px solid", "border-color": rx.color("amber", 9)},
-        on_click=rx.redirect(f"/{partita.code}/overview"),
+        on_click=rx.redirect(f"/match/{partita.code}/overview"),
     )
 
 

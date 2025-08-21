@@ -10,8 +10,19 @@ def get_match_stats(code):
     return DB.stats.find_one({"code": code}) or dict()
 
 
+def get_matches_stats(filters, sort):
+    return DB.stats.find(filters, sort=sort)
+
+
 def get_match_insights(code):
     return DB.insights.find_one({"code": code})
+
+
+def get_matches_insights(filters, sort):
+    return DB.insights.find(filters, sort=sort)
+
+
+# ----- NEW
 
 
 def create_match(code, match_data, players_n):

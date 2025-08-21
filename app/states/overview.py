@@ -1,7 +1,7 @@
 from locale import LC_TIME, setlocale
 
 import reflex as rx
-from app.database.data import to_metric
+from app.database.data import SINGLE_SHOTS, to_metric
 from app.database.matches import parse_model
 from app.database.stats import get_match_insights, get_match_stats
 from app.templates.base import State
@@ -68,25 +68,9 @@ class OverviewState(State):
     def calculate_quality(self, data):
         if not data:
             return 0, ""
-        attributes = [
-            "serves",
-            "returns",
-            "drives",
-            "drops",
-            "dinks",
-            "lobs",
-            "smashes",
-            "third_drives",
-            "third_drops",
-            "third_lobs",
-            "resets",
-            "speedups",
-            "passing",
-            "poaches",
-        ]
         qualities = {
             attr: (data.get(attr).get("count"), quality)
-            for attr in attributes
+            for attr in SINGLE_SHOTS
             if (quality := data.get(attr).get("average_quality"))
         }
         total_weight = sum(count for count, _ in qualities.values())

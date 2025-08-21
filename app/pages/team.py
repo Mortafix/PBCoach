@@ -151,7 +151,7 @@ def thirds_item(team_idx, thirds_data, thirds_quality) -> rx.Component:
 
 
 @template(
-    route="/[match_id]/team",
+    route="/match/[match_id]/team",
     title="Statistiche Team",
     description="Analisi del Coach Dinky dei team della partita",
     on_load=[OverviewState.on_load, TeamState.on_load],
@@ -262,9 +262,13 @@ def team_page() -> rx.Component:
         ),
         rx.divider(),
         rx.hstack(
-            page_link("Riepilogo della Partita", f"/{TeamState.match_id}/overview"),
-            page_link("Statistiche dei Giocatori", f"/{TeamState.match_id}/players"),
-            page_link("Video della Partita", f"/{TeamState.match_id}/video"),
+            page_link(
+                "Riepilogo della Partita", f"/match/{TeamState.match_id}/overview"
+            ),
+            page_link(
+                "Statistiche dei Giocatori", f"/match/{TeamState.match_id}/players"
+            ),
+            page_link("Video della Partita", f"/match/{TeamState.match_id}/video"),
             width="100%",
             wrap="wrap",
         ),

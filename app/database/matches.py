@@ -31,6 +31,7 @@ class Partita(rx.Base):
     win_team2: bool
     is_double: bool = True
     video_id: str | None = None
+    is_allenamento: bool = False
 
 
 def parse_model(data):
@@ -62,6 +63,7 @@ def parse_model(data):
         win_team2=score[1] > score[0],
         is_double=players_n == 4,
         video_id=data.get("info").get("video"),
+        is_allenamento=data.get("info").get("type") == "Allenamento",
     )
 
 

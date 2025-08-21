@@ -1,7 +1,7 @@
 import reflex as rx
 
 
-def base_pie_chart(icon="", title="", data=None, fmt=": ") -> rx.Component:
+def base_pie_chart(icon="", title="", data=None, fmt=": ", size=250) -> rx.Component:
     return rx.vstack(
         rx.cond(
             title,
@@ -26,8 +26,8 @@ def base_pie_chart(icon="", title="", data=None, fmt=": ") -> rx.Component:
             ),
             rx.recharts.graphing_tooltip(separator=f" {fmt}"),
             rx.recharts.legend(),
-            width=250,
-            height=250,
+            width=size,
+            height=size,
         ),
         width="100%",
         flex="1 1 45%",

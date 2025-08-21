@@ -98,11 +98,11 @@ def player_item(giocatore: Player):
             justify="center",
         ),
         flex=["100%", "100%", "45%", "30%", "20%", "17%"],
-        # cursor="pointer",
+        cursor="pointer",
         max_width="28rem",
         border="2px solid transparent",
         _hover={"border": "2px solid", "border-color": rx.color("amber", 9)},
-        # on_click=rx.redirect(f"/{PlayersState.match.code}/player/{index}"),
+        on_click=rx.redirect(f"/player/{giocatore.id}"),
     )
 
 

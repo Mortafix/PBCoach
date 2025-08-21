@@ -87,7 +87,7 @@ def player_quality(data, player_index):
 
 
 @template(
-    route="/[match_id]/overview",
+    route="/match/[match_id]/overview",
     title="Match",
     description="Analisi del Coach Dinky della partita",
     on_load=OverviewState.on_load,
@@ -205,11 +205,11 @@ def home_page() -> rx.Component:
         ),
         rx.divider(),
         rx.hstack(
-            page_link("Statistiche dei Team", f"/{OverviewState.match_id}/team"),
+            page_link("Statistiche dei Team", f"/match/{OverviewState.match_id}/team"),
             page_link(
-                "Statistiche dei Giocatori", f"/{OverviewState.match_id}/players"
+                "Statistiche dei Giocatori", f"/match/{OverviewState.match_id}/players"
             ),
-            page_link("Video della Partita", f"/{OverviewState.match_id}/video"),
+            page_link("Video della Partita", f"/match/{OverviewState.match_id}/video"),
             width="100%",
             wrap="wrap",
         ),
@@ -225,11 +225,11 @@ def home_page() -> rx.Component:
 class RedirectCodeState(rx.State):
     @rx.event
     def go_to_page(self):
-        return rx.redirect(f"/{self.match_id}/overview")
+        return rx.redirect(f"/match/{self.match_id}/overview")
 
 
 @template(
-    route="/[match_id]",
+    route="/match/[match_id]",
     on_load=RedirectCodeState.go_to_page,
     description="Analisi del Coach Dinky della partita",
     # meta=[
@@ -237,5 +237,5 @@ class RedirectCodeState(rx.State):
     #     {"property": "og:description", "content": OverviewState.players_description},
     # ],
 )
-def partenza():
+def redirect_match_code():
     return rx.text("Redirecting...")

@@ -7,6 +7,7 @@ load_dotenv()
 mongo_user = getenv("mongo-user")
 mongo_pwd = getenv("mongo-password")
 mongo_ip = getenv("mongo-ip")
+mongo_direct = getenv("mongo-direct") == "true"
 mongo_production = getenv("mongo-production") == "true"
 
 # ---- database
@@ -16,9 +17,10 @@ def init_connection():
     max_idle_time = 3  # minutes
     max_server_select_time = 2  # seconds
     auth = f"{mongo_user}:{mongo_pwd}@" if mongo_user else ""
+    srv_option = "+srv" if not mongo_direct else ""
     connection = (
-        f"mongodb://{auth}{mongo_ip}:27017/"
-        "?directConnection=true&retryWrites=true&w=majority"
+        f"mongodb{srv_option}://{auth}{mongo_ip}/"
+        f"?directConnection={str(mongo_direct).lower()}&retryWrites=true&w=majority"
         f"&serverSelectionTimeoutMS={max_server_select_time * 1000}"
         f"&maxIdleTimeMS={max_idle_time * 60000}"
     )

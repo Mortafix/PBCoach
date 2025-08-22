@@ -68,7 +68,7 @@ def parse_model(data):
 
 
 def get_all_matches(filters=None, sort=None, limit=10**10, parse=True):
-    matches = DB.stats.find(filters, sort=sort or [("match_date", 1)], limit=limit)
+    matches = DB.stats.find(filters, sort=sort or [("info.date", 1)], limit=limit)
     if parse:
         return [parse_model(match) for match in matches]
     return matches

@@ -1,6 +1,7 @@
 import reflex as rx
 from app.components.cards import card
-from app.components.charts import base_pie_chart
+from app.components.charts import (accuracy_area_chart, base_area_chart,
+                                   base_pie_chart)
 from app.components.extra import page_loading
 from app.components.player import player_item
 from app.states.player_page import PlayerState
@@ -137,6 +138,27 @@ def players_selection() -> rx.Component:
                 spacing="7",
             ),
             width="100%",
+        ),
+        rx.cond(
+            player.matches > 1,
+            card(
+                rx.hstack(
+                    base_area_chart(
+                        "shield-check", "Qualità", player.area_quality, trend=True
+                    ),
+                    accuracy_area_chart(
+                        "target",
+                        "Accuratezza",
+                        player.area_accuracy,
+                        player.matches_names,
+                    ),
+                    width="100%",
+                    align="center",
+                    justify_content="space-evenly",
+                    wrap="wrap",
+                ),
+                width="100%",
+            ),
         ),
         spacing="5",
         width="100%",

@@ -1,9 +1,11 @@
 from collections import Counter
+from datetime import datetime
+from re import split
 
 import reflex as rx
 from app.database.data import (AGGRESSIVE_SHOTS, DEFENSIVE_SHOTS, SINGLE_SHOTS,
                                shots_name_italian, to_metric)
-from app.database.matches import get_all_matches
+from app.database.matches import Partita, get_all_matches
 from app.database.players import get_player_name
 from app.database.stats import get_matches_insights, get_matches_stats
 from app.templates.base import State
@@ -11,6 +13,7 @@ from app.templates.base import State
 
 class PlayerPage(rx.Base):
     matches: int
+    matches_names: list[str]
     matches_won: int
     allenamenti: int
     teammates: list[tuple[int, int]]
@@ -19,8 +22,9 @@ class PlayerPage(rx.Base):
     distance_str: str
     quality: list[float]
     finals: list[float]
-    errors: list[float]
     accuracy: list[float]
+    faults_net: list[float]
+    faults_out: list[float]
     shots: dict[str, int]
     serves_speed: list[float]
     serves_fastest: float
@@ -44,6 +48,9 @@ class PlayerPage(rx.Base):
     pie_rallies: list[dict]
     pie_shots_type: list[dict]
     pie_shots: list[dict]
+    # area chart
+    area_quality: list[dict]
+    area_accuracy: list[dict[str, int]]
 
 
 def to_pie_base(green_data, red_data, labels, colors=["green", "red"]):
@@ -78,7 +85,21 @@ def to_pie_shot(shots):
     ]
 
 
-def parse_model(matches, won, allenamenti, teammates, data):
+def to_area_base(names, data):
+    return [{"name": name, "value": value} for name, value in zip(names, data) if value]
+
+
+def to_area_accuracy(names, net_data, out_data):
+    return [
+        {"in": 100 - (round(net) + round(out)), "net": round(net), "out": round(out)}
+        for _, net, out in zip(names, net_data, out_data)
+    ]
+
+
+# ---- model
+
+
+def parse_model(names, matches, won, allenamenti, teammates, data):
     distance = sum(data.get("distance"))
     shots = {
         shot: data.get("shots").get(shot)
@@ -88,6 +109,7 @@ def parse_model(matches, won, allenamenti, teammates, data):
     shots_type_diff = data.get("shots_aggressive") - data.get("shots_defensive")
     return PlayerPage(
         matches=matches,
+        matches_names=names,
         matches_won=sum(won),
         allenamenti=allenamenti,
         teammates=[
@@ -101,8 +123,9 @@ def parse_model(matches, won, allenamenti, teammates, data):
         ),
         quality=data.get("quality"),
         finals=data.get("finals"),
-        errors=data.get("errors"),
         accuracy=data.get("accuracy"),
+        faults_net=data.get("faults_net"),
+        faults_out=data.get("faults_out"),
         shots=shots,
         serves_speed=data.get("serves_speed"),
         serves_fastest=data.get("serves_fastest"),
@@ -140,6 +163,10 @@ def parse_model(matches, won, allenamenti, teammates, data):
             colors=["indigo", "crimson"],
         ),
         pie_shots=to_pie_shot(shots),
+        area_quality=to_area_base(names, [round(q * 100) for q in data.get("quality")]),
+        area_accuracy=to_area_accuracy(
+            names, data.get("faults_net"), data.get("faults_out")
+        ),
     )
 
 
@@ -150,6 +177,25 @@ class PlayerState(State):
     player_name: str = ""
     base_db_filter: dict = {}
     player: PlayerPage = None
+    events: list[tuple[str, list[Partita]]]
+
+    def _get_unique_events(self, all_events):
+        unique_event, prev_date, prev_norm = list(), datetime.min, ""
+        for match in all_events:
+            base_name = split(r"[-|]", match.name)[0].strip()
+            day_in_s = 24 * 60 * 60
+            if (
+                not prev_norm
+                or base_name != prev_norm
+                or (match.date - prev_date).total_seconds() > day_in_s
+            ):
+                unique_event.append((base_name, [match]))
+                prev_norm = base_name
+                prev_date = match.date
+            else:
+                unique_event[-1][1].append(match)
+
+        return unique_event
 
     @rx.event
     def on_load(self):
@@ -179,6 +225,8 @@ class PlayerState(State):
             for match in matches
             if not match.is_allenamento
         ]
+        names = [match.name for match in matches]
+        self.events = self._get_unique_events(matches)
         # stats (sorted)
         codes = [match.code for match in matches if not match.is_allenamento]
         filters = {"code": {"$in": codes}}
@@ -188,7 +236,8 @@ class PlayerState(State):
             "distance": [],
             "quality": [],
             "finals": [],
-            "errors": [],
+            "faults_net": [],
+            "faults_out": [],
             "accuracy": [],
             "shots": [],
             "serves_speed": [],
@@ -214,9 +263,8 @@ class PlayerState(State):
             data["finals"].append(
                 p_stat.get("final_shot_count") / p_stat.get("shot_count")
             )
-            data["errors"].append(
-                p_stat.get("net_fault_percentage") + p_stat.get("out_fault_percentage")
-            )
+            data["faults_net"].append(p_stat.get("net_fault_percentage"))
+            data["faults_out"].append(p_stat.get("out_fault_percentage"))
             accuracy = []
             shots = {}
             for shot in SINGLE_SHOTS:
@@ -286,5 +334,5 @@ class PlayerState(State):
         data["rallies_total"] = len(rallies_won)
         data["rallies_won"] = sum(rallies_won)
         self.player = parse_model(
-            matches_n, matches_won, allenamenti_n, teammates, data
+            names, matches_n, matches_won, allenamenti_n, teammates, data
         )

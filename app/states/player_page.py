@@ -86,7 +86,19 @@ def to_pie_shot(shots):
 
 
 def to_area_base(names, data):
-    return [{"name": name, "value": value} for name, value in zip(names, data) if value]
+    names_axis: list[str] = list()
+    already_seen = list()
+    for name in names:
+        unique_name = name
+        if name in already_seen:
+            count = already_seen.count(name)
+            if count == 1:
+                names_axis[already_seen.index(name)] += " (1)"
+            unique_name = f"{name} ({count + 1})"
+        names_axis.append(unique_name)
+        already_seen.append(name)
+    res = [{"name": name, "value": val} for name, val in zip(names_axis, data) if val]
+    return res + [res[-1]]
 
 
 def to_area_accuracy(names, net_data, out_data):
@@ -178,6 +190,8 @@ class PlayerState(State):
     base_db_filter: dict = {}
     player: PlayerPage = None
     events: list[tuple[str, list[Partita]]]
+    show_quality_trend: bool = False
+    stack_accuracy: bool = True
 
     def _get_unique_events(self, all_events):
         unique_event, prev_date, prev_norm = list(), datetime.min, ""
@@ -198,7 +212,18 @@ class PlayerState(State):
         return unique_event
 
     @rx.event
+    def set_quality_trend(self, value: bool):
+        self.show_quality_trend = value
+
+    @rx.event
+    def set_accuracy_stack(self, value: bool):
+        self.stack_accuracy = value
+
+    @rx.event
     def on_load(self):
+        self.show_quality_trend = False
+        self.stack_accuracy = True
+        # data
         player_id = int(self.player_id)
         self.base_db_filter: dict = {"players_ids": int(self.player_id)}
         self.player_name = get_player_name(player_id)

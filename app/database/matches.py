@@ -15,6 +15,7 @@ class Partita(rx.Base):
     date: datetime
     date_str: str
     date_str_short: str
+    date_str_shortest: str
     location: str
     location_type: str
     type: str
@@ -44,6 +45,7 @@ def parse_model(data):
         name=data.get("info").get("name"),
         date=data.get("info").get("date"),
         date_str=format(data.get("info").get("date"), "%A • %d %B %y • %H:%M"),
+        date_str_shortest=format(data.get("info").get("date"), "%d.%m.%y"),
         date_str_short=format(data.get("info").get("date"), "%a • %d %b %y • %H:%M"),
         location=get_location_name(data.get("info").get("location")),
         location_type=data.get("info").get("location-type"),

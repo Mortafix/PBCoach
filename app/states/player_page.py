@@ -190,6 +190,8 @@ class PlayerState(State):
     base_db_filter: dict = {}
     player: PlayerPage = None
     events: list[tuple[str, list[Partita]]]
+    events_selected: list[tuple[str, list[Partita]]]
+    event_search: str = ""
     show_quality_trend: bool = False
     stack_accuracy: bool = True
 
@@ -212,6 +214,43 @@ class PlayerState(State):
         return unique_event
 
     @rx.event
+    def set_event_search(self, value: str):
+        self.events = []
+        if not value:
+            self.events = []
+            return
+        self.event_search = value
+        matches_found = get_all_matches(
+            self.base_db_filter
+            | {
+                "info.type": {"$ne": "Allenamento"},
+                "info.name": {"$regex": f"(?i){value}"},
+            }
+        )
+        for event in self._get_unique_events(matches_found):
+            if event not in self.events_selected:
+                self.events.append(event)
+
+    @rx.event
+    def add_event(self, event_idx: int):
+        self.events_selected.append(self.events.pop(event_idx))
+        self.build_data()
+        if not self.events:
+            self.event_search = ""
+
+    @rx.event
+    def remove_event(self, event_selected_ix: int):
+        self.events_selected.pop(event_selected_ix)
+        self.build_data()
+
+    @rx.event
+    def remove_all_events(self):
+        self.events_selected = []
+        self.events = []
+        self.event_search = ""
+        self.build_data()
+
+    @rx.event
     def set_quality_trend(self, value: bool):
         self.show_quality_trend = value
 
@@ -223,11 +262,19 @@ class PlayerState(State):
     def on_load(self):
         self.show_quality_trend = False
         self.stack_accuracy = True
-        # data
+        self.event_search = ""
+        self.events = []
+        self.events_selected = []
+        self.build_data()
+
+    @rx.event
+    def build_data(self):
         player_id = int(self.player_id)
         self.base_db_filter: dict = {"players_ids": int(self.player_id)}
         self.player_name = get_player_name(player_id)
-        matches = get_all_matches(self.base_db_filter)
+        matches = [match for _, matches in self.events_selected for match in matches]
+        if not matches:
+            matches = get_all_matches(self.base_db_filter)
         allenamenti_n = sum(match.is_allenamento for match in matches)
         matches_n = len(matches) - allenamenti_n
         teammates_history = [
@@ -251,7 +298,6 @@ class PlayerState(State):
             if not match.is_allenamento
         ]
         names = [match.name for match in matches]
-        self.events = self._get_unique_events(matches)
         # stats (sorted)
         codes = [match.code for match in matches if not match.is_allenamento]
         filters = {"code": {"$in": codes}}

@@ -116,7 +116,7 @@ class UploadState(State):
                 )
         if create_match(self.code, form_data, self.players_n):
             yield rx.toast.success("Info della partita aggiornate!")
-            return rx.redirect(f"/{self.code}/overview")
+            return rx.redirect(f"/match/{self.code}/overview")
         return rx.toast.error("Errore durante l'aggiornamento delle info")
 
     @rx.event

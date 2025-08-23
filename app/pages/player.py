@@ -70,6 +70,18 @@ def base_event(event, index, **attributes):
     )
 
 
+def render_keyword(keyword):
+    return rx.text(
+        keyword,
+        size="3",
+        padding="0.2em 0.6em",
+        border_radius="2em",
+        bg=rx.color("gray", 3),
+        cursor="pointer",
+        on_click=lambda: PlayerState.set_event_search(keyword),
+    )
+
+
 def render_type_badge(player_type):
     def badge(color):
         return rx.badge(rx.text(player_type, size="5"), color_scheme=color, size="3")
@@ -152,7 +164,7 @@ def players_selection() -> rx.Component:
                         rx.icon("search"),
                         rx.input(
                             placeholder="Cerca evento",
-                            on_change=PlayerState.set_event_search.debounce(300),
+                            on_change=PlayerState.set_event_search,
                             value=PlayerState.event_search,
                             size="3",
                             width="100%",
@@ -170,6 +182,26 @@ def players_selection() -> rx.Component:
                         ),
                         align="center",
                         width="100%",
+                    ),
+                    rx.cond(
+                        ~PlayerState.event_search,
+                        rx.hstack(
+                            rx.foreach(PlayerState.keywords, render_keyword),
+                            spacing="2",
+                            align="center",
+                            justify="center",
+                            width="100%",
+                            wrap="wrap",
+                        ),
+                    ),
+                    rx.cond(
+                        PlayerState.event_loading,
+                        rx.hstack(
+                            rx.spinner(size="3"),
+                            rx.text("Ricerca in corso", color_scheme="gray"),
+                            align="center",
+                            spacing="2",
+                        ),
                     ),
                     rx.vstack(
                         rx.foreach(PlayerState.events_selected, render_sel_event)

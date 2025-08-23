@@ -192,8 +192,10 @@ class PlayerState(State):
     events: list[tuple[str, list[Partita]]]
     events_selected: list[tuple[str, list[Partita]]]
     event_search: str = ""
+    event_loading: bool = False
     show_quality_trend: bool = False
     stack_accuracy: bool = True
+    keywords: list[str] = []
 
     def _get_unique_events(self, all_events):
         unique_event, prev_date, prev_norm = list(), datetime.min, ""
@@ -215,11 +217,13 @@ class PlayerState(State):
 
     @rx.event
     def set_event_search(self, value: str):
+        self.event_search = value
         self.events = []
         if not value:
             self.events = []
             return
-        self.event_search = value
+        self.event_loading = True
+        yield
         matches_found = get_all_matches(
             self.base_db_filter
             | {
@@ -230,6 +234,7 @@ class PlayerState(State):
         for event in self._get_unique_events(matches_found):
             if event not in self.events_selected:
                 self.events.append(event)
+        self.event_loading = False
 
     @rx.event
     def add_event(self, event_idx: int):
@@ -265,6 +270,8 @@ class PlayerState(State):
         self.event_search = ""
         self.events = []
         self.events_selected = []
+        self.event_loading = False
+        self.keywords = []
         self.build_data()
 
     @rx.event
@@ -275,6 +282,15 @@ class PlayerState(State):
         matches = [match for _, matches in self.events_selected for match in matches]
         if not matches:
             matches = get_all_matches(self.base_db_filter)
+            keywords = Counter(
+                word.lower()
+                for match in matches
+                for word in match.name.split(" ")
+                if len(word) > 2
+                and not word.isdigit()
+                and word not in ("della", "dal", "per")
+            )
+            self.keywords = [word for word, _ in keywords.most_common(7)]
         allenamenti_n = sum(match.is_allenamento for match in matches)
         matches_n = len(matches) - allenamenti_n
         teammates_history = [

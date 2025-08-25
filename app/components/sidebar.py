@@ -165,7 +165,9 @@ def sidebar_footer(state) -> rx.Component:
                     rx.text(
                         "Condivi la Partita",
                         on_click=[
-                            rx.set_clipboard(f"https://dinky.moris.dev/{match_id}"),
+                            rx.set_clipboard(
+                                f"https://dinky.moris.dev/match/{match_id}"
+                            ),
                             rx.toast.success("Link alla partita copiato!"),
                         ],
                     ),

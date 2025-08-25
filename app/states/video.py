@@ -133,7 +133,7 @@ class VideoState(OverviewState):
         start, end = self.rallies[max(self.current_rally - 1, 0)]
         temp_f = NamedTemporaryFile(delete=False, suffix=".mp4")
         temp_f.close()
-        await download_clip(self.match.video_id, start, end + 2, temp_f.name)
+        await download_clip(self.match.video_id, start - 3, end + 3, temp_f.name)
         with open(temp_f.name, "rb") as f:
             video_bytes = f.read()
         match_name = self.match.name.lower().replace(" ", "_")

@@ -1,5 +1,9 @@
+from os import path, remove
+from tempfile import NamedTemporaryFile
+
 import reflex as rx
 from app.database.data import highlights_icons, highlights_name_italian
+from app.database.video import download_clip
 from app.states.overview import OverviewState
 from reflex.utils.format import format_ref
 
@@ -13,9 +17,12 @@ class VideoState(OverviewState):
     rallies: list[tuple[float, float]] = []
     skip_segments: list[tuple[float, float]] = []
     highlights: list[tuple[int, str, str]] = []
+    video_downloading: bool = False
 
     @rx.event
     def on_load(self):
+        self.current_seconds = 0
+        self.video_downloading = False
         self.rallies_score = [
             tuple(rally_score)
             for rally in self.match_insights.get("rallies")
@@ -116,3 +123,23 @@ class VideoState(OverviewState):
     def go_to_rally(self, rally_n):
         start_rally = self.rallies[max(rally_n - 1, 0)][0]
         return self.go_to(start_rally)
+
+    # ---- video download
+
+    @rx.event(background=True)
+    async def download_rally(self):
+        async with self:
+            self.video_downloading = True
+        start, end = self.rallies[max(self.current_rally - 1, 0)]
+        temp_f = NamedTemporaryFile(delete=False, suffix=".mp4")
+        temp_f.close()
+        await download_clip(self.match.video_id, start, end + 2, temp_f.name)
+        with open(temp_f.name, "rb") as f:
+            video_bytes = f.read()
+        match_name = self.match.name.lower().replace(" ", "_")
+        filename = f"{match_name}-rally#{self.current_rally}"
+        yield rx.download(data=video_bytes, filename=f"{filename}.mp4")
+        async with self:
+            self.video_downloading = False
+        if path.exists(temp_f.name):
+            remove(temp_f.name)

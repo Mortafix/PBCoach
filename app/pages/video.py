@@ -95,19 +95,31 @@ def video_page():
         ),
         rx.hstack(
             rx.hstack(
-                btn_icon(
-                    "chevron-left",
-                    variant="soft",
-                    disabled=VideoState.is_first_rally,
-                    on_click=VideoState.prev_rally,
+                rx.hstack(
+                    btn_icon(
+                        "chevron-left",
+                        variant="soft",
+                        disabled=VideoState.is_first_rally,
+                        on_click=VideoState.prev_rally,
+                    ),
+                    rx.text("Rally ", rx.code(VideoState.current_rally)),
+                    btn_icon(
+                        "chevron-right",
+                        variant="soft",
+                        disabled=VideoState.is_last_rally,
+                        on_click=VideoState.next_rally,
+                    ),
+                    align="center",
                 ),
-                rx.text("Rally ", rx.code(VideoState.current_rally)),
-                btn_icon(
-                    "chevron-right",
-                    variant="soft",
-                    disabled=VideoState.is_last_rally,
-                    on_click=VideoState.next_rally,
+                btn_text_icon(
+                    "download",
+                    "Download Rally",
+                    variant="surface",
+                    loading=VideoState.video_downloading,
+                    on_click=VideoState.download_rally,
                 ),
+                wrap="wrap",
+                spacing="4",
                 align="center",
             ),
             rx.hstack(

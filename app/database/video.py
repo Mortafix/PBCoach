@@ -15,29 +15,22 @@ async def download_async(url, opts):
 
 async def download_clip(video_id, start, end, filename):
     url = f"https://stream.mux.com/{video_id}.m3u8"
-    ffmpeg_options = {
-        "-ss": str(start),
-        "-to": str(end),
+    ffmpeg_args = {
+        "-ss": f"{start:.3f}",
+        "-t": f"{end - start:.3f}",
         "-c": "copy",
+        "-start_at_zero": "",
         "-movflags": "+faststart",
     }
     options = {
         "outtmpl": filename,
         "merge_output_format": "mp4",
-        "format": (
-            "bestvideo[height=1080][vcodec*=avc1]/"
-            "bestvideo[height=1080][vcodec*=h264]/"
-            "bestvideo[height>=1080][vcodec*=h264]/"
-            "bestvideo[vcodec*=h264]/best"
-            " +bestaudio/best"
-        ),
+        "format": "bv*+ba/best",
         "retries": 5,
         "fragment_retries": 5,
         "external_downloader": "ffmpeg",
         "external_downloader_args": {
-            "ffmpeg": [
-                param for key, val in ffmpeg_options.items() for param in (key, val)
-            ],
+            "ffmpeg": [p for el in ffmpeg_args.items() for p in el if p]
         },
         "quiet": True,
         "no_warnings": True,

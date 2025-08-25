@@ -1,40 +1,42 @@
-import asyncio
+from asyncio import get_event_loop
 
-import yt_dlp
+from yt_dlp import YoutubeDL
 
 
 def run_download(url, opts):
-    with yt_dlp.YoutubeDL(opts) as ydl:
+    with YoutubeDL(opts) as ydl:
         ydl.download([url])
 
 
 async def download_async(url, opts):
-    loop = asyncio.get_event_loop()
+    loop = get_event_loop()
     return await loop.run_in_executor(None, run_download, url, opts)
 
 
 async def download_clip(video_id, start, end, filename):
     url = f"https://stream.mux.com/{video_id}.m3u8"
+    ffmpeg_options = {
+        "-ss": str(start),
+        "-to": str(end),
+        "-c": "copy",
+        "-movflags": "+faststart",
+    }
     options = {
         "outtmpl": filename,
         "merge_output_format": "mp4",
-        "format": "bv*+ba/best",
+        "format": (
+            "bestvideo[height=1080][vcodec*=avc1]/"
+            "bestvideo[height=1080][vcodec*=h264]/"
+            "bestvideo[height>=1080][vcodec*=h264]/"
+            "bestvideo[vcodec*=h264]/best"
+            " +bestaudio/best"
+        ),
         "retries": 5,
         "fragment_retries": 5,
         "external_downloader": "ffmpeg",
         "external_downloader_args": {
-            # "ffmpeg_i": ["-hide_banner", "-loglevel", "error", "-nostats"],
             "ffmpeg": [
-                "-ss",
-                str(start),
-                "-to",
-                str(end),
-                "-c:v",
-                "libx264",
-                "-c:a",
-                "aac",
-                "-movflags",
-                "+faststart",
+                param for key, val in ffmpeg_options.items() for param in (key, val)
             ],
         },
         "quiet": True,

@@ -18,8 +18,9 @@ async def download_clip(video_id, start, end, filename):
     ffmpeg_args = {
         "-ss": f"{start:.3f}",
         "-t": f"{end - start:.3f}",
-        "-c": "copy",
-        "-start_at_zero": "",
+        "-c:v": "copy",
+        "-c:a": "aac",
+        "-b:a": "160k",
         "-movflags": "+faststart",
     }
     options = {

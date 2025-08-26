@@ -121,26 +121,63 @@ def players_page() -> rx.Component:
     return rx.vstack(
         page_title("users", "Giocatori"),
         rx.hstack(
-            rx.icon("search", size=28, stroke_width=1.5),
-            rx.input(
-                placeholder="Cerca...",
-                on_change=PlayersState.search.debounce(300),
-                size="3",
-                width="100%",
-                value=PlayersState.search_text,
-            ),
-            rx.cond(
-                PlayersState.is_search_active,
-                btn_icon(
-                    "x",
-                    color_scheme="red",
-                    variant="soft",
-                    on_click=PlayersState.reset_search,
+            rx.hstack(
+                rx.icon("search", size=28, stroke_width=1.5),
+                rx.input(
+                    placeholder="Cerca...",
+                    on_change=PlayersState.search.debounce(300),
+                    size="3",
+                    width="100%",
+                    value=PlayersState.search_text,
                 ),
+                rx.cond(
+                    PlayersState.is_search_active,
+                    btn_icon(
+                        "x",
+                        color_scheme="red",
+                        variant="soft",
+                        on_click=PlayersState.reset_search,
+                    ),
+                ),
+                flex="1 1 73%",
+                width="100%",
+                align="center",
+                spacing="2",
             ),
+            rx.hstack(
+                rx.cond(
+                    PlayersState.sorting_asc,
+                    rx.icon(
+                        "arrow-down-a-z",
+                        size=28,
+                        stroke_width=1.5,
+                        cursor="pointer",
+                        on_click=PlayersState.toggle_sorting_direction,
+                    ),
+                    rx.icon(
+                        "arrow-up-a-z",
+                        size=28,
+                        stroke_width=1.5,
+                        cursor="pointer",
+                        on_click=PlayersState.toggle_sorting_direction,
+                    ),
+                ),
+                rx.select(
+                    ["Nome", "Qualità", "Partite"],
+                    size="3",
+                    width="85%",
+                    value=PlayersState.sorting_attr,
+                    on_change=PlayersState.change_sorting,
+                ),
+                flex="1 1 23%",
+                width="100%",
+                align="center",
+                spacing="2",
+            ),
+            justify_content="space-evenly",
             width="100%",
-            align="center",
-            spacing="2",
+            spacing="5",
+            wrap="wrap",
         ),
         rx.hstack(
             rx.foreach(PlayersState.players, player_item),

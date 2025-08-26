@@ -10,6 +10,8 @@ setlocale(LC_TIME, "it_IT.UTF-8")
 
 class PlayersState(State):
     search_text: str = ""
+    sorting_attr: str = "Nome"
+    sorting_asc: bool = True
     players: list[Player] = []
     is_search_active: bool = False
     players_played: dict[int, int] = {}
@@ -20,6 +22,8 @@ class PlayersState(State):
     @rx.event
     def on_load(self):
         self.search_text = ""
+        self.sorting_attr: str = "Nome"
+        self.sorting_asc: bool = True
         self.is_search_active = False
         self.is_hamburger_visible = False
         self.players = get_all_players(sort=[("name", 1), ("surname", 1)], parse=True)
@@ -49,3 +53,30 @@ class PlayersState(State):
         self.players = get_all_players(
             filters, sort=[("name", 1), ("surname", 1)], parse=True
         )
+
+    @rx.event
+    def toggle_sorting_direction(self):
+        self.sorting_asc = not self.sorting_asc
+        self.change_sorting()
+
+    @rx.event
+    def change_sorting(self, value=None):
+        if value is not None:
+            self.sorting_attr = value
+        sort_dir = 1 if self.sorting_asc else -1
+        if self.sorting_attr == "Nome":
+            self.players = get_all_players(
+                sort=[("name", sort_dir), ("surname", sort_dir)], parse=True
+            )
+        if self.sorting_attr == "Qualità":
+            self.players = sorted(
+                get_all_players(parse=True),
+                key=lambda player: self.players_quality.get(player.id),
+                reverse=self.sorting_asc,
+            )
+        if self.sorting_attr == "Partite":
+            self.players = sorted(
+                get_all_players(parse=True),
+                key=lambda player: self.players_played.get(player.id),
+                reverse=self.sorting_asc,
+            )

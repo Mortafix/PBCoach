@@ -154,7 +154,7 @@ def players_selection() -> rx.Component:
                     wrap="wrap",
                 ),
                 width="100%",
-                min_width="25rem",
+                min_width="18rem",
                 flex="1 1 45%",
             ),
             card(

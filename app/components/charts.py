@@ -78,7 +78,7 @@ def quality_area_chart(icon="", title="", data=None, state=None) -> rx.Component
         width="100%",
         flex="1 1 45%",
         align="center",
-        min_width="30rem",
+        min_width="15rem",
     )
 
 
@@ -135,5 +135,5 @@ def accuracy_area_chart(icon="", title="", data=None, state=None) -> rx.Componen
         width="100%",
         flex="1 1 45%",
         align="center",
-        min_width="30rem",
+        min_width="15rem",
     )

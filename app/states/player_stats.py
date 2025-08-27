@@ -139,8 +139,6 @@ class PlayerState(OverviewState):
 
     @rx.event
     def on_load(self):
-        if not self.match_stats:
-            return
         player_id = int(self.player_id)
         self.player_name = self.match.players_full[player_id]
         # player stats

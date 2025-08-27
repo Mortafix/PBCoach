@@ -105,8 +105,6 @@ class TeamState(OverviewState):
 
     @rx.event
     def on_load(self):
-        if not self.match_stats:
-            return
         players_stats = [p for p in self.match_stats.get("players") if p]
         team1_stats = [players_stats[i] for i in self.match.team1_idx]
         team2_stats = [players_stats[i] for i in self.match.team2_idx]

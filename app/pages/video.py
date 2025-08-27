@@ -1,5 +1,5 @@
 import reflex as rx
-from app.components.extra import page_link, page_title
+from app.components.extra import page_link, page_loading, page_title
 from app.components.input import btn_icon, btn_text_icon
 from app.pages.extra import match_not_found
 from app.states.overview import OverviewState
@@ -194,8 +194,9 @@ def video_page():
         ),
         width="100%",
     )
-    return rx.cond(
+    return rx.match(
         VideoState.is_match_found,
+        (None, page_loading()),
+        (False, match_not_found()),
         rx.cond(video_id, video_player, no_video()),
-        match_not_found(),
     )

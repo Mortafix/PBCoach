@@ -1,6 +1,6 @@
 import reflex as rx
 from app.components.cards import card
-from app.components.extra import page_link, page_title
+from app.components.extra import page_link, page_loading, page_title
 from app.components.player import player_item
 from app.components.shots import base_item, quality_item
 from app.database.data import color_quality, shots_name_italian
@@ -216,7 +216,12 @@ def home_page() -> rx.Component:
         spacing="5",
         width="100%",
     )
-    return rx.cond(OverviewState.is_match_found, page, match_not_found())
+    return rx.match(
+        OverviewState.is_match_found,
+        (None, page_loading()),
+        (False, match_not_found()),
+        page,
+    )
 
 
 # ---- REDIRECT | only code
@@ -238,4 +243,6 @@ class RedirectCodeState(rx.State):
     # ],
 )
 def redirect_match_code():
-    return rx.text("Redirecting...")
+    return rx.hstack(
+        rx.icon("link"), rx.text("Ti sto portando alla partita..."), align="center"
+    )

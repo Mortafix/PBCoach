@@ -25,7 +25,6 @@ class PlayersState(State):
         self.sorting_attr: str = "Nome"
         self.sorting_asc: bool = True
         self.is_search_active = False
-        self.is_hamburger_visible = False
         self.players = get_all_players(sort=[("name", 1), ("surname", 1)], parse=True)
         stats = get_players_general_stats()
         self.players_played, self.players_quality, self.players_quality_history = stats

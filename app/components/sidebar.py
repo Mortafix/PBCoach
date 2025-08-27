@@ -5,14 +5,16 @@ from app.styles import sidebar_close_width, sidebar_width
 def sidebar_minimize(state) -> rx.Component:
     return rx.box(
         rx.button(
-            rx.icon(rx.cond(state.is_sidebar_open, "chevron-left", "chevron-right")),
+            rx.cond(
+                state.is_sidebar_open, rx.icon("chevron-left"), rx.icon("chevron-right")
+            ),
             color_scheme="gray",
             opacity=0.7,
             variant="ghost",
             cursor="pointer",
             size="1",
             padding="0.05rem",
-            on_click=state.toggle_sidebar(),
+            on_click=state.toggle_sidebar,
         ),
         position="absolute",
         top=10,
@@ -205,9 +207,7 @@ def sidebar_footer(state) -> rx.Component:
 def sidebar(state) -> rx.Component:
     sidebar_elem = rx.flex(
         rx.vstack(
-            rx.tablet_and_desktop(
-                sidebar_minimize(state),
-            ),
+            rx.tablet_and_desktop(sidebar_minimize(state)),
             sidebar_header(state),
             rx.cond(state.is_sidebar_open, rx.divider()),
             sidebar_menu(state),

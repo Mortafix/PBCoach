@@ -1,7 +1,7 @@
 import reflex as rx
 from app.components.cards import card
 from app.components.charts import base_pie_chart
-from app.components.extra import page_link, page_title
+from app.components.extra import page_link, page_loading, page_title
 from app.components.input import btn_text_icon
 from app.components.shots import (base_item, deep_item, height_item,
                                   quality_item, velocity_item)
@@ -366,4 +366,10 @@ def players_selection() -> rx.Component:
         spacing="5",
         width="100%",
     )
-    return rx.cond(PlayersState.is_match_found, page, match_not_found())
+    return rx.match(
+        PlayerState.is_match_found,
+        (None, page_loading()),
+        (False, match_not_found()),
+        page,
+    )
+    # return rx.cond(PlayersState.is_match_found, page, match_not_found())

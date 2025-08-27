@@ -1,3 +1,5 @@
+from re import search
+
 import reflex as rx
 from app.database.matches import Partita
 
@@ -20,12 +22,19 @@ class State(rx.State):
 
     @rx.event
     def on_load(self):
+        if self.match and self.match.code == self.match_id:
+            return
         self.is_header_open = True
-        self.is_hamburger_visible = True
+        if search(r"^/match/", self.router.route_id):
+            self.is_in_match = True
+            self.match = None
+            self.is_sidebar_open = True
+            self.is_hamburger_visible = True
+            return
+        self.is_hamburger_visible = False
+        self.is_in_match = False
         self.is_sidebar_force_open = False
         self.is_sidebar_open = False
-        self.is_in_match = False
-        self.match = None
         self.selected_items = {}
 
     @rx.event

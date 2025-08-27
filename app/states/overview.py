@@ -10,7 +10,7 @@ setlocale(LC_TIME, "it_IT.UTF-8")
 
 
 class OverviewState(State):
-    is_match_found: bool
+    is_match_found: bool | None = None
     rally_total: int = 0
     rally_kitchen: int = 0
     rally_avg: float = 0
@@ -24,16 +24,16 @@ class OverviewState(State):
 
     @rx.event
     def on_load(self):
-        self.is_sidebar_open = True
-        self.is_in_match = True
-        self.match_stats = get_match_stats(self.match_id)
-        if not self.match_stats:
-            self.is_sidebar_open = False
-            self.is_match_found = False
-            return
-        self.match_insights = get_match_insights(self.match_id)
-        self.match = parse_model(self.match_stats)
-        self.is_match_found = True
+        if not self.match:
+            self.is_match_found = None
+            self.match_stats = get_match_stats(self.match_id)
+            if not self.match_stats:
+                self.is_sidebar_open = False
+                self.is_match_found = False
+                return
+            self.match_insights = get_match_insights(self.match_id)
+            self.match = parse_model(self.match_stats)
+            self.is_match_found = True
         # overview info
         game = self.match_stats.get("game", {})
         self.rally_total = len(self.match_insights.get("rallies"))

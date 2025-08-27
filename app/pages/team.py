@@ -1,7 +1,7 @@
 import reflex as rx
 from app.components.cards import card
 from app.components.charts import base_pie_chart
-from app.components.extra import page_link, page_title
+from app.components.extra import page_link, page_loading, page_title
 from app.components.player import player_item
 from app.components.shots import custom_item, deep_item, quality_item
 from app.database.data import color_quality
@@ -275,4 +275,9 @@ def team_page() -> rx.Component:
         spacing="5",
         width="100%",
     )
-    return rx.cond(TeamState.is_match_found, page, match_not_found())
+    return rx.match(
+        TeamState.is_match_found,
+        (None, page_loading()),
+        (False, match_not_found()),
+        page,
+    )

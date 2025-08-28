@@ -115,10 +115,10 @@ def team_page() -> rx.Component:
     page = rx.vstack(
         rx.cond(
             PlayerState.is_sidebar_open,
-            page_title("user", f"Statisiche di {PlayerState.player_name}"),
+            page_title("user", f"Statistiche di {PlayerState.player_name}"),
             page_title(
                 "user",
-                f"Statisiche di {PlayerState.player_name} • {PlayerState.match.name}",
+                f"Statistiche di {PlayerState.player_name} • {PlayerState.match.name}",
             ),
         ),
         card(

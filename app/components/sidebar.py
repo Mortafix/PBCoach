@@ -129,7 +129,7 @@ def sidebar_menu_players(state) -> rx.Component:
         rx.cond(
             state.is_sidebar_open,
             rx.hstack(
-                rx.text("Statische Giocatori", color_scheme="gray", opacity=0.7),
+                rx.text("Statistiche Giocatori", color_scheme="gray", opacity=0.7),
                 width="100%",
                 justify="center",
                 padding_left="0",

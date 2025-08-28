@@ -164,8 +164,8 @@ def team_page() -> rx.Component:
     page = rx.vstack(
         rx.cond(
             TeamState.is_sidebar_open,
-            page_title("users", "Statisiche del Team"),
-            page_title("users", f"Statisiche del Team • {TeamState.match.name}"),
+            page_title("users", "Statistiche del Team"),
+            page_title("users", f"Statistiche del Team • {TeamState.match.name}"),
         ),
         rx.hstack(
             card(

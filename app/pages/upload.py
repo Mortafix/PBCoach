@@ -1,5 +1,5 @@
 import reflex as rx
-from app.components.cards import form_card
+from app.components.cards import card, form_card
 from app.components.extra import form_divider
 from app.components.input import (btn_icon, btn_text_icon, field_style,
                                   form_header, std_input)
@@ -38,11 +38,20 @@ def player_selection(player_n):
                 field_style | {"width": "88%"},
             ),
         ),
-        btn_icon(
-            rx.cond(UploadState.unknowns[player_n - 1], "user-search", "user-x"),
-            on_click=lambda: UploadState.toggle_player(player_n - 1),
-            type="button",
-            variant="soft",
+        rx.cond(
+            UploadState.unknowns[player_n - 1],
+            btn_icon(
+                "user-search",
+                on_click=lambda: UploadState.toggle_player(player_n - 1),
+                type="button",
+                variant="soft",
+            ),
+            btn_icon(
+                "user-x",
+                on_click=lambda: UploadState.toggle_player(player_n - 1),
+                type="button",
+                variant="soft",
+            ),
         ),
         align="center",
         width="100%",
@@ -151,6 +160,99 @@ def add_location_dialog(trigger) -> rx.Component:
                 reset_on_submit=False,
             ),
         ),
+    )
+
+
+# ---- UI
+
+
+def form_url() -> rx.Component:
+    return rx.vstack(
+        form_card(
+            rx.flex(
+                form_header(
+                    "link",
+                    "Trova la Partita",
+                    (
+                        "Inserisci l'",
+                        rx.code("URL pubblico"),
+                        " della partita per cercare le statistiche",
+                    ),
+                ),
+                rx.divider(),
+                rx.form(
+                    rx.vstack(
+                        std_input(
+                            "link",
+                            "URL",
+                            rx.input(
+                                placeholder="URL pubblico della partita",
+                                id="url",
+                                name="url",
+                                **field_style,
+                            ),
+                        ),
+                        btn_text_icon(
+                            "search",
+                            "Cerca informazioni",
+                            type="submit",
+                            loading=UploadState.loading_info,
+                            **field_style,
+                        ),
+                        spacing="5",
+                        align="center",
+                    ),
+                    on_submit=UploadState.search_info,
+                    width="100%",
+                ),
+                width="100%",
+                spacing="4",
+                flex_direction="column",
+            )
+        ),
+        rx.cond(
+            UploadState.info_found,
+            card(
+                rx.vstack(
+                    rx.callout(
+                        f"Trovata una partita di {UploadState.players_n} giocatori!",
+                        icon="circle-check",
+                        color_scheme="green",
+                    ),
+                    rx.image(
+                        f"https://image.mux.com/{UploadState.video_id}/thumbnail.jpg"
+                        "?time=30&width=640&fit_mode=preserve"
+                    ),
+                    btn_text_icon(
+                        "circle-chevron-right",
+                        "Continua inserimento",
+                        width="100%",
+                        on_click=UploadState.go_next_step,
+                    ),
+                    align="center",
+                ),
+                margin_inline="auto",
+            ),
+        ),
+        rx.cond(
+            UploadState.info_not_found,
+            card(
+                rx.vstack(
+                    rx.callout(
+                        "Nessuna partita trovata..", icon="circle-x", color_scheme="red"
+                    ),
+                    btn_text_icon(
+                        "circle-chevron-right",
+                        "Inserisci manualmente",
+                        width="100%",
+                        on_click=UploadState.go_manual_upload,
+                    ),
+                ),
+                margin_inline="auto",
+            ),
+        ),
+        spacing="5",
+        width="100%",
     )
 
 
@@ -359,13 +461,16 @@ def form_name() -> rx.Component:
                                 ),
                             ),
                         ),
-                        std_input(
-                            "video",
-                            "Video ID",
-                            rx.input(
-                                placeholder="Video ID da pb.vision [opzionale]",
-                                name="video-id",
-                                **field_style,
+                        rx.cond(
+                            ~UploadState.video_id,
+                            std_input(
+                                "video",
+                                "Video ID",
+                                rx.input(
+                                    placeholder="Video ID da pb.vision [opzionale]",
+                                    name="video-id",
+                                    **field_style,
+                                ),
                             ),
                         ),
                         form_divider("users", "Squadre"),
@@ -459,4 +564,9 @@ def form_name() -> rx.Component:
     ],
 )
 def home_page() -> rx.Component:
-    return rx.cond(UploadState.uploaded, form_name(), form_upload())
+    return rx.match(
+        UploadState.phase,
+        ("url", form_url()),
+        ("manual", form_upload()),
+        ("info", form_name()),
+    )

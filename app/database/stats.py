@@ -25,7 +25,7 @@ def get_matches_insights(filters, sort):
 # ----- NEW
 
 
-def create_match(code, match_data, players_n):
+def create_match(code, match_data, video_id, players_n):
     players = [
         int(match_data.get(f"giocatore_{i+1}", -1))
         for i in range(4)
@@ -49,7 +49,7 @@ def create_match(code, match_data, players_n):
             "location": int(match_data.get("location")),
             "location-type": match_data.get("location-type"),
             "weather": match_data.get("weather"),
-            "video": match_data.get("video-id"),
+            "video": video_id or match_data.get("video-id"),
         },
         "players_ids": players,
     }

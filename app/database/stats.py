@@ -25,11 +25,11 @@ def get_matches_insights(filters, sort):
 # ----- NEW
 
 
-def create_match(code, match_data, video_id, players_n):
+def create_match(code, match_data, extra_info):
     players = [
         int(match_data.get(f"giocatore_{i+1}", -1))
         for i in range(4)
-        if players_n == 4 or i in [0, 2]
+        if extra_info.get("players") == 4 or i in [0, 2]
     ]
     unknown_idx = 1
     for i, player in enumerate(players):
@@ -49,7 +49,8 @@ def create_match(code, match_data, video_id, players_n):
             "location": int(match_data.get("location")),
             "location-type": match_data.get("location-type"),
             "weather": match_data.get("weather"),
-            "video": video_id or match_data.get("video-id"),
+            "video": extra_info.get("video") or match_data.get("video-id"),
+            "pbvision-url": extra_info.get("url"),
         },
         "players_ids": players,
     }

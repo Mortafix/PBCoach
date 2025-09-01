@@ -27,11 +27,10 @@ def get_last_id():
     return entry[0].get("id") if entry else 0
 
 
-def add_location_to_db(name):
-    data = {"id": get_last_id() + 1, "name": name}
+def add_location_to_db(name, court):
+    data = {"id": get_last_id() + 1, "name": name, "court": court}
     return DB.locations.insert_one(data)
 
 
-def get_location_name(location_id, dfu="..."):
-    location = DB.locations.find_one({"id": location_id})
-    return location.get("name") if location else dfu
+def get_location_info(location_id):
+    return DB.locations.find_one({"id": location_id})

@@ -145,7 +145,13 @@ def home_page() -> rx.Component:
             rx.hstack(
                 info_item("Tipo", "biceps-flexed", OverviewState.match.type),
                 info_item("Location", "map-pin", OverviewState.match.location),
-                info_item("Campo", "warehouse", OverviewState.match.location_type),
+                rx.cond(
+                    OverviewState.match.location_court,
+                    info_item(
+                        "Superficie", "traffic-cone", OverviewState.match.location_court
+                    ),
+                ),
+                info_item("Campo", "mountain-snow", OverviewState.match.location_type),
                 rx.cond(
                     OverviewState.match.location_type == "Outdoor",
                     info_item("Meteo", "cloud-sun", OverviewState.match.weather),

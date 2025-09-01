@@ -4,6 +4,7 @@ from app.components.extra import form_divider
 from app.components.input import (btn_icon, btn_text_icon, field_style,
                                   form_header, std_input)
 from app.components.selects import location_select, player_select
+from app.database.data import COURTS
 from app.states.upload import UploadState
 from app.templates import template
 
@@ -129,6 +130,12 @@ def add_location_dialog(trigger) -> rx.Component:
                         on_change=UploadState.set_location_name,
                         **field_style,
                     ),
+                    rx.select(
+                        COURTS,
+                        placeholder="Seleziona la superficie",
+                        name="court",
+                        **field_style,
+                    ),
                     rx.hstack(
                         rx.alert_dialog.cancel(
                             rx.button(
@@ -142,11 +149,10 @@ def add_location_dialog(trigger) -> rx.Component:
                         rx.alert_dialog.action(
                             rx.button(
                                 "Aggiungi",
+                                type="submit",
                                 variant="solid",
                                 width="100%",
                                 cursor="pointer",
-                                type="button",
-                                on_click=UploadState.add_location,
                             ),
                             width="50%",
                         ),
@@ -157,6 +163,7 @@ def add_location_dialog(trigger) -> rx.Component:
                     direction="column",
                     spacing="4",
                 ),
+                on_submit=UploadState.add_location,
                 reset_on_submit=False,
             ),
         ),

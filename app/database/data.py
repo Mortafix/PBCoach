@@ -106,3 +106,15 @@ SINGLE_SHOTS = [
 
 AGGRESSIVE_SHOTS = ["drives", "poaches", "third_drives", "speedups", "poaches"]
 DEFENSIVE_SHOTS = ["drops", "dinks", "third_drops", "resets", "lobs"]
+
+# ---- COURTS
+
+COURTS = [
+    "Cemento",
+    "Resina",
+    "Asfalto",
+    "Gomma",
+    "Legno",
+    "PVC",
+    "Tappeto portatile",
+]

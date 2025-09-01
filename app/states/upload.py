@@ -19,6 +19,7 @@ class UploadState(State):
     info_found: bool = False
     info_not_found: bool = False
     loading_info: bool = False
+    original_url: str = ""
     video_id: str = ""
     uploaded: bool = False
     uploading: bool = False
@@ -33,10 +34,12 @@ class UploadState(State):
 
     @rx.event
     def on_load(self):
+        self.match = None
         self.phase = "url"
         self.info_found = False
         self.info_not_found = False
         self.loading_info = False
+        self.original_url = ""
         self.video_id = ""
         self.player_name = ""
         self.player_surname = ""
@@ -55,8 +58,8 @@ class UploadState(State):
         self.info_found = False
         self.loading_info = True
         yield
-        match_url = form_data.get("url")
-        if not (m := search(r"share\/(\w+)(\?rf)?", match_url)):
+        self.original_url = form_data.get("url")
+        if not (m := search(r"share\/(\w+)(\?rf)?", self.original_url)):
             self.info_not_found = True
             self.loading_info = False
             return
@@ -166,7 +169,12 @@ class UploadState(State):
                     "Le info della partita sono obbligatorie e i giocatori "
                     "devono essere tutti diversi"
                 )
-        if create_match(self.code, form_data, self.video_id, self.players_n):
+        extra_info = {
+            "video": self.video_id,
+            "url": self.original_url,
+            "players": self.players_n,
+        }
+        if create_match(self.code, form_data, extra_info):
             yield rx.toast.success("Info della partita aggiornate!")
             return rx.redirect(f"/match/{self.code}/overview")
         return rx.toast.error("Errore durante l'aggiornamento delle info")
@@ -202,10 +210,10 @@ class UploadState(State):
         return rx.toast.error("Errore durante l'aggiunta del giocatore")
 
     @rx.event
-    def add_location(self):
+    def add_location(self, form_data):
         if not self.location_name:
             return rx.toast.error("Devi inserire almeno il nome")
-        if add_location_to_db(self.location_name):
+        if add_location_to_db(self.location_name, form_data.get("court")):
             self.location_name = ""
             return rx.toast.success("Location aggiunto!")
         return rx.toast.error("Errore durante l'aggiunta della location")

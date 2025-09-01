@@ -21,6 +21,7 @@ class PlayersState(State):
 
     @rx.event
     def on_load(self):
+        self.match = None
         self.search_text = ""
         self.sorting_attr: str = "Nome"
         self.sorting_asc: bool = True

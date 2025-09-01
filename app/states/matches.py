@@ -20,6 +20,7 @@ class MatchesState(State):
 
     @rx.event
     def on_load(self):
+        self.match = None
         self.are_filters_set = False
         self.matches = get_all_matches(sort=[("info.date", -1)])
         self.players = [

@@ -3,7 +3,7 @@ from locale import LC_TIME, setlocale
 
 import reflex as rx
 from app.database.connection import DB
-from app.database.locations import get_location_name
+from app.database.locations import get_location_info
 from app.database.players import get_player_name
 
 setlocale(LC_TIME, "it_IT.UTF-8")
@@ -17,6 +17,7 @@ class Partita(rx.Base):
     date_str_short: str
     date_str_shortest: str
     location: str
+    location_court: str
     location_type: str
     type: str
     weather: str | None = None
@@ -36,6 +37,7 @@ class Partita(rx.Base):
 
 
 def parse_model(data):
+    location = get_location_info(data.get("info").get("location"))
     players_ids = data.get("players_ids")
     players = [get_player_name(p_id, short=True) for p_id in players_ids]
     players_n = len(players)
@@ -47,7 +49,8 @@ def parse_model(data):
         date_str=format(data.get("info").get("date"), "%A • %d %B %y • %H:%M"),
         date_str_shortest=format(data.get("info").get("date"), "%d.%m.%y"),
         date_str_short=format(data.get("info").get("date"), "%a • %d %b %y • %H:%M"),
-        location=get_location_name(data.get("info").get("location")),
+        location=location.get("name", ""),
+        location_court=location.get("court", ""),
         location_type=data.get("info").get("location-type"),
         type=data.get("info").get("type"),
         weather=data.get("info").get("weather"),

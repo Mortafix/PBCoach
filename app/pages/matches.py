@@ -23,6 +23,10 @@ def match_item(partita: Partita):
             rx.hstack(
                 rx.badge(partita.type, color_scheme="gray"),
                 rx.badge(partita.location, color_scheme="gray"),
+                rx.cond(
+                    partita.location_court,
+                    rx.badge(partita.location_court, color_scheme="gray"),
+                ),
                 rx.badge(partita.location_type, color_scheme="gray"),
                 rx.cond(
                     partita.location_type == "Outdoor",

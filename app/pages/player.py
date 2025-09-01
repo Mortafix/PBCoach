@@ -5,7 +5,7 @@ from app.components.charts import (accuracy_area_chart, base_pie_chart,
 from app.components.extra import page_loading
 from app.components.input import btn_text_icon
 from app.components.player import player_item
-from app.states.player_page import PlayerState
+from app.states.player import PlayerState
 from app.templates import template
 
 # ---- UI

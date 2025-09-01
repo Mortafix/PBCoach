@@ -4,7 +4,7 @@ from app.components.chips import chips
 from app.components.expanders import expander
 from app.components.extra import page_title
 from app.components.input import btn_text_icon
-from app.components.player import player_item
+from app.components.player import player_item_small
 from app.database.matches import Partita
 from app.states.matches import MatchesState
 from app.templates import template
@@ -14,8 +14,11 @@ def match_item(partita: Partita):
     def player_elem(index) -> rx.Component:
         name = partita.players[index]
         player_id = partita.players_ids[index]
-        return player_item(player_id, name)
+        return player_item_small(player_id, name)
 
+    trophy_badge = rx.badge(
+        rx.icon("trophy", size=18), color_scheme="amber", radius="full", size="2"
+    )
     return card(
         rx.vstack(
             rx.text(partita.name, size="8", weight="bold", align="center"),
@@ -37,35 +40,58 @@ def match_item(partita: Partita):
                 width="100%",
                 wrap="wrap",
             ),
-            rx.divider(),
-            rx.hstack(
-                rx.foreach(partita.team1_idx, player_elem),
-                width="100%",
-                align="center",
-                justify="center",
-                spacing="4",
-            ),
-            rx.hstack(
-                rx.cond(
-                    partita.win_team1,
-                    rx.icon("trophy", size=24, color=rx.color("amber", 9)),
+            rx.spacer(),
+            # rx.divider(),
+            rx.box(
+                rx.vstack(
+                    rx.hstack(
+                        rx.hstack(
+                            rx.foreach(partita.team1_idx, player_elem),
+                            width="100%",
+                            align="center",
+                            justify="start",
+                            wrap="wrap",
+                        ),
+                        rx.hstack(
+                            rx.cond(partita.win_team1, trophy_badge),
+                            rx.text(
+                                partita.score[0],
+                                size="6",
+                                weight=rx.cond(partita.win_team1, "bold", "normal"),
+                            ),
+                            align="center",
+                            spacing="2",
+                        ),
+                        align="center",
+                        width="100%",
+                        justify="between",
+                    ),
+                    rx.divider(),
+                    rx.hstack(
+                        rx.hstack(
+                            rx.foreach(partita.team2_idx, player_elem),
+                            width="100%",
+                            align="center",
+                            justify="start",
+                            wrap="wrap",
+                        ),
+                        rx.hstack(
+                            rx.cond(partita.win_team2, trophy_badge),
+                            rx.text(
+                                partita.score[1],
+                                size="6",
+                                weight=rx.cond(partita.win_team2, "bold", "normal"),
+                            ),
+                            align="center",
+                            spacing="2",
+                        ),
+                        align="center",
+                        width="100%",
+                        justify="between",
+                    ),
+                    width="100%",
                 ),
-                rx.text(partita.score[0], size="8", weigth="bold"),
-                rx.text("-", size="8", weigth="bold", opacity=0.5),
-                rx.text(partita.score[1], size="8", weigth="bold"),
-                rx.cond(
-                    partita.win_team2,
-                    rx.icon("trophy", size=24, color=rx.color("amber", 9)),
-                ),
-                spacing="3",
-                align="center",
-            ),
-            rx.hstack(
-                rx.foreach(partita.team2_idx, player_elem),
                 width="100%",
-                align="center",
-                justify="center",
-                spacing="4",
             ),
             align="center",
             justify="center",

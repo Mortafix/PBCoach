@@ -22,6 +22,7 @@ class State(rx.State):
 
     @rx.event
     def on_load(self):
+        self.expander_is_open = False
         if self.match and self.match.code == self.match_id:
             return
         self.is_header_open = True

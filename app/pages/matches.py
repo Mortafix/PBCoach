@@ -4,95 +4,18 @@ from app.components.chips import chips
 from app.components.expanders import expander
 from app.components.extra import page_title
 from app.components.input import btn_text_icon
-from app.components.player import player_item_small
+from app.components.match import match_score, match_title
 from app.database.matches import Partita
 from app.states.matches import MatchesState
 from app.templates import template
 
 
 def match_item(partita: Partita):
-    def player_elem(index) -> rx.Component:
-        name = partita.players[index]
-        player_id = partita.players_ids[index]
-        return player_item_small(player_id, name)
-
-    trophy_badge = rx.badge(
-        rx.icon("trophy", size=18), color_scheme="amber", radius="full", size="2"
-    )
     return card(
         rx.vstack(
-            rx.text(partita.name, size="8", weight="bold", align="center"),
-            rx.text(partita.date_str, color_scheme="gray", align="center"),
-            rx.hstack(
-                rx.badge(partita.type, color_scheme="gray"),
-                rx.badge(partita.location, color_scheme="gray"),
-                rx.cond(
-                    partita.location_court,
-                    rx.badge(partita.location_court, color_scheme="gray"),
-                ),
-                rx.badge(partita.location_type, color_scheme="gray"),
-                rx.cond(
-                    partita.location_type == "Outdoor",
-                    rx.badge(partita.weather, color_scheme="gray"),
-                ),
-                align="center",
-                justify="center",
-                width="100%",
-                wrap="wrap",
-            ),
+            match_title(partita),
             rx.spacer(),
-            # rx.divider(),
-            rx.box(
-                rx.vstack(
-                    rx.hstack(
-                        rx.hstack(
-                            rx.foreach(partita.team1_idx, player_elem),
-                            width="100%",
-                            align="center",
-                            justify="start",
-                            wrap="wrap",
-                        ),
-                        rx.hstack(
-                            rx.cond(partita.win_team1, trophy_badge),
-                            rx.text(
-                                partita.score[0],
-                                size="6",
-                                weight=rx.cond(partita.win_team1, "bold", "normal"),
-                            ),
-                            align="center",
-                            spacing="2",
-                        ),
-                        align="center",
-                        width="100%",
-                        justify="between",
-                    ),
-                    rx.divider(),
-                    rx.hstack(
-                        rx.hstack(
-                            rx.foreach(partita.team2_idx, player_elem),
-                            width="100%",
-                            align="center",
-                            justify="start",
-                            wrap="wrap",
-                        ),
-                        rx.hstack(
-                            rx.cond(partita.win_team2, trophy_badge),
-                            rx.text(
-                                partita.score[1],
-                                size="6",
-                                weight=rx.cond(partita.win_team2, "bold", "normal"),
-                            ),
-                            align="center",
-                            spacing="2",
-                        ),
-                        align="center",
-                        width="100%",
-                        justify="between",
-                    ),
-                    width="100%",
-                ),
-                width="100%",
-            ),
+            match_score(partita),
             align="center",
             justify="center",
             width="100%",

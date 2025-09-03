@@ -24,6 +24,7 @@ class Partita(rx.Base):
     players: list[str]
     players_full: list[str]
     players_ids: list[int]
+    players_ids_str: list[str]
     players_full_ids: list[int]
     players_n: int
     score: tuple[int, int]
@@ -57,6 +58,7 @@ def parse_model(data):
         players=players,
         players_full=players if players_n == 4 else [players[0], "", players[1], ""],
         players_ids=players_ids,
+        players_ids_str=[str(p_id) for p_id in players_ids],
         players_full_ids=(
             players_ids if players_n == 4 else [players_ids[0], 0, players_ids[1], 0]
         ),

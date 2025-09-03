@@ -71,12 +71,12 @@ class PlayersState(State):
         if self.sorting_attr == "Qualità":
             self.players = sorted(
                 get_all_players(parse=True),
-                key=lambda player: self.players_quality.get(player.id),
+                key=lambda player: self.players_quality.get(player.id, 0),
                 reverse=self.sorting_asc,
             )
         if self.sorting_attr == "Partite":
             self.players = sorted(
                 get_all_players(parse=True),
-                key=lambda player: self.players_played.get(player.id),
+                key=lambda player: self.players_played.get(player.id, 0),
                 reverse=self.sorting_asc,
             )

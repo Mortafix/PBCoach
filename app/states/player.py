@@ -186,6 +186,7 @@ def parse_model(names, matches, won, allenamenti, teammates, data):
 
 
 class PlayerState(State):
+    matches: list[Partita] = []
     player_name: str = ""
     base_db_filter: dict = {}
     player: PlayerPage = None
@@ -265,6 +266,7 @@ class PlayerState(State):
 
     @rx.event
     def on_load(self):
+        self.matches = []
         self.show_quality_trend = False
         self.stack_accuracy = True
         self.event_search = ""
@@ -291,6 +293,7 @@ class PlayerState(State):
                 and word not in ("della", "dal", "per")
             )
             self.keywords = [word for word, _ in keywords.most_common(7)]
+        self.matches = matches
         allenamenti_n = sum(match.is_allenamento for match in matches)
         matches_n = len(matches) - allenamenti_n
         teammates_history = [

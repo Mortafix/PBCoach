@@ -2,8 +2,10 @@ import reflex as rx
 from app.components.cards import card
 from app.components.charts import (accuracy_area_chart, base_pie_chart,
                                    quality_area_chart)
+from app.components.expanders import expander
 from app.components.extra import page_loading
 from app.components.input import btn_text_icon
+from app.components.match import match_score, match_title
 from app.components.player import player_item
 from app.states.player import PlayerState
 from app.templates import template
@@ -107,6 +109,32 @@ def render_teammate(player):
         align="center",
         justify="between",
     )
+
+
+def match_preview(partita):
+    return card(
+        rx.flex(
+            match_title(
+                partita,
+                title_size="7",
+                margin_right=[0, 0, "1.5em"],
+                margin_bottom=["1.5em", "1.5em", 0],
+            ),
+            match_score(partita, active=PlayerState.player_id),
+            flex_direction=["column", "column", "row"],
+            align="center",
+            justify="center",
+            width="100%",
+        ),
+        width="100%",
+        border="2px solid transparent",
+        cursor="pointer",
+        _hover={"border": "2px solid", "border-color": rx.color("amber", 9)},
+        on_click=rx.redirect(f"/match/{partita.code}/overview"),
+    )
+
+
+# ---- PAGE
 
 
 @template(
@@ -268,6 +296,16 @@ def players_selection() -> rx.Component:
                 ),
                 width="100%",
             ),
+        ),
+        expander(
+            rx.hstack(
+                rx.icon("trophy", size=28, stroke_width=2),
+                rx.heading("Partite giocate", size="7"),
+                align="center",
+            ),
+            rx.vstack(rx.foreach(PlayerState.matches, match_preview), width="100%"),
+            size="3",
+            width="100%",
         ),
         spacing="5",
         width="100%",

@@ -46,6 +46,6 @@ async def update_players_avatar(token: str = Depends(verify_token)):
             f"assets/players/{player.id}.jpg",
         )
         count += 1
-    for i in range(4):
+    for i in range(1, 5):
         copyfile("assets/images/avatars/U-0.jpg", f"assets/players/-{i}.jpg")
     return {"response": f"Ok, updated {count} players avatar."}

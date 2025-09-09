@@ -6,7 +6,7 @@ import reflex as rx
 from app.database.data import (AGGRESSIVE_SHOTS, DEFENSIVE_SHOTS, SINGLE_SHOTS,
                                shots_name_italian, to_metric)
 from app.database.matches import Partita, get_all_matches
-from app.database.players import get_player_name
+from app.database.players import get_player_gender_from_db, get_player_name
 from app.database.stats import get_matches_insights, get_matches_stats
 from app.templates.base import State
 
@@ -190,6 +190,7 @@ class PlayerState(State):
     player_name: str = ""
     base_db_filter: dict = {}
     player: PlayerPage = None
+    player_gender: str = ""
     events: list[tuple[str, list[Partita]]]
     events_selected: list[tuple[str, list[Partita]]]
     event_search: str = ""
@@ -267,6 +268,7 @@ class PlayerState(State):
     @rx.event
     def on_load(self):
         self.matches = []
+        self.player_gender = ""
         self.show_quality_trend = False
         self.stack_accuracy = True
         self.event_search = ""
@@ -281,6 +283,7 @@ class PlayerState(State):
         player_id = int(self.player_id)
         self.base_db_filter: dict = {"players_ids": int(self.player_id)}
         self.player_name = get_player_name(player_id)
+        self.player_gender = get_player_gender_from_db(player_id)
         matches = [match for _, matches in self.events_selected for match in matches]
         if not matches:
             matches = get_all_matches(self.base_db_filter)

@@ -67,7 +67,7 @@ def add_player_dialog(trigger) -> rx.Component:
             rx.form(
                 rx.flex(
                     rx.input(
-                        placeholder="Nome del giocatoere",
+                        placeholder="Nome del giocatore",
                         name="name",
                         required=True,
                         value=UploadState.player_name,
@@ -79,6 +79,14 @@ def add_player_dialog(trigger) -> rx.Component:
                         name="surname",
                         value=UploadState.player_surname,
                         on_change=UploadState.set_player_surname,
+                        **field_style,
+                    ),
+                    rx.select(
+                        ["Maschio", "Femmina", "Non specificato"],
+                        placeholder="Genere del giocatore",
+                        name="gender",
+                        value=UploadState.player_gender,
+                        on_change=UploadState.set_player_gender,
                         **field_style,
                     ),
                     rx.hstack(

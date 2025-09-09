@@ -1,6 +1,7 @@
 from json import dump, loads
 from os import makedirs, path
 from re import match, search
+from shutil import copyfile
 
 import reflex as rx
 from app.components.extra import code_generator
@@ -28,6 +29,7 @@ class UploadState(State):
     code: str | None = None
     player_name: str = ""
     player_surname: str = ""
+    player_gender: str = ""
     unknowns: list[bool] = []
     location_type: str = ""
     location_name: str = ""
@@ -43,6 +45,7 @@ class UploadState(State):
         self.video_id = ""
         self.player_name = ""
         self.player_surname = ""
+        self.player_gender = ""
         self.uploaded = False
         self.players_n = 0
         self.unknowns = [False] * 4
@@ -192,6 +195,10 @@ class UploadState(State):
         self.player_surname = value
 
     @rx.event
+    def set_player_gender(self, value):
+        self.player_gender = value
+
+    @rx.event
     def set_location_type(self, value):
         self.location_type = value
 
@@ -201,11 +208,24 @@ class UploadState(State):
 
     @rx.event
     def add_player(self):
+        def get_avatar_filename(new_id, gender):
+            if not gender or gender == "Non specificato":
+                return "N-0.jpg"
+            return f"{gender[0]}-{new_id % 3}.jpg"
+
         if not self.player_name:
             return rx.toast.error("Devi inserire almeno il nome")
-        if add_player_to_db(self.player_name, self.player_surname):
+        if new_id := add_player_to_db(
+            self.player_name, self.player_surname, self.player_gender
+        ):
+            avatar_filename = get_avatar_filename(new_id, self.player_gender)
             self.player_name = ""
             self.player_surname = ""
+            self.player_gender = ""
+            copyfile(
+                f"assets/images/avatars/{avatar_filename}",
+                f"assets/players/{new_id}.jpg",
+            )
             return rx.toast.success("Giocatore aggiunto!")
         return rx.toast.error("Errore durante l'aggiunta del giocatore")
 

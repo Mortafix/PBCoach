@@ -1,6 +1,10 @@
 import reflex as rx
 
 
+def gender_color(gender):
+    return rx.match(gender, ("Maschio", "indigo"), ("Femmina", "pink"), "green")
+
+
 def player_item(player_id, name) -> rx.Component:
     name = rx.cond(name, name, "")
     return rx.hstack(

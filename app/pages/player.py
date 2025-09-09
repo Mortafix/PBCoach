@@ -6,7 +6,7 @@ from app.components.expanders import expander
 from app.components.extra import page_loading
 from app.components.input import btn_text_icon
 from app.components.match import match_score, match_title
-from app.components.player import player_item
+from app.components.player import gender_color, player_item
 from app.states.player import PlayerState
 from app.templates import template
 
@@ -145,6 +145,7 @@ def match_preview(partita):
 )
 def players_selection() -> rx.Component:
     player = PlayerState.player
+    color = gender_color(PlayerState.player_gender)
     page = rx.vstack(
         rx.hstack(
             card(
@@ -156,8 +157,12 @@ def players_selection() -> rx.Component:
                             fallback=PlayerState.player_name[:2],
                             border="3px solid white",
                             size="8",
+                            color_scheme=color,
                         ),
-                        rx.badge(rx.text(PlayerState.player_name, size="6")),
+                        rx.badge(
+                            rx.text(PlayerState.player_name, size="6"),
+                            color_scheme=color,
+                        ),
                         spacing="5",
                         align="center",
                         width="100%",

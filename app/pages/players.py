@@ -2,6 +2,7 @@ import reflex as rx
 from app.components.cards import card
 from app.components.extra import page_title
 from app.components.input import btn_icon
+from app.components.player import gender_color
 from app.database.data import color_quality
 from app.database.players import Player
 from app.states.players import PlayersState
@@ -53,16 +54,19 @@ def player_item(giocatore: Player):
     trend_icon = rx.cond(
         quality_history[0] > quality_history[-1], "trending-down", "trending-up"
     )
+    color = gender_color(giocatore.gender)
     return card(
         rx.vstack(
-            rx.code(giocatore.short_name, size="7"),
+            rx.code(giocatore.short_name, size="7", color_scheme=color),
             rx.avatar(
                 src=f"/players/{giocatore.id}.jpg",
                 radius="full",
                 fallback=giocatore.name[:2],
                 border="4px solid white",
                 size="8",
+                color_scheme=color,
             ),
+            rx.divider(),
             rx.cond(
                 partite_giocate,
                 rx.vstack(

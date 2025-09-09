@@ -7,13 +7,20 @@ class Player(rx.Base):
     name: str
     surname: str
     short_name: str
+    gender: str
 
 
 def parse_model(data):
     name = data.get("name")
     surname = data.get("surname")
     short_name = f"{name} {surname[0]}." if surname else name
-    return Player(id=data.get("id"), name=name, surname=surname, short_name=short_name)
+    return Player(
+        id=data.get("id"),
+        name=name,
+        surname=surname,
+        short_name=short_name,
+        gender=data.get("gender", ""),
+    )
 
 
 def get_all_players(filters=None, sort=None, limit=10**10, names=False, parse=False):
@@ -30,9 +37,16 @@ def get_last_id():
     return entry[0].get("id") if entry else 0
 
 
-def add_player_to_db(name, surname):
-    data = {"id": get_last_id() + 1, "name": name, "surname": surname}
-    return DB.players.insert_one(data)
+def add_player_to_db(name, surname, gender):
+    new_id = get_last_id() + 1
+    data = {
+        "id": new_id,
+        "name": name.title(),
+        "surname": surname.title(),
+        "gender": gender,
+    }
+    if DB.players.insert_one(data):
+        return new_id
 
 
 def get_player_name(player_id, short=False, only_name=False):
@@ -68,3 +82,8 @@ def get_players_general_stats():
         media_ponderata = sum(v * p for v, p in zip(history, pesi)) / sum(pesi)
         qualities[player] = round(media_ponderata)
     return played, qualities, qualities_hist
+
+
+def get_player_gender_from_db(player_id):
+    giocatore = DB.players.find_one({"id": player_id})
+    return giocatore.get("gender", "") if giocatore else ""

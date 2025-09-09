@@ -1,4 +1,4 @@
-from os import getenv
+from os import getenv, path
 from shutil import copyfile
 
 from app.database.players import get_all_players
@@ -38,6 +38,8 @@ async def test_token(token: str = Depends(verify_token)):
 async def update_players_avatar(token: str = Depends(verify_token)):
     count = 0
     for player in get_all_players(parse=True):
+        if path.exists(f"assets/players/{player.id}.jpg"):
+            continue
         avatar_filename = "N-0.jpg"
         if player.gender and player.gender != "Non specificato":
             avatar_filename = f"{player.gender[0]}-{player.id % 3}.jpg"

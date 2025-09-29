@@ -69,8 +69,8 @@ class UploadState(State):
         pb_id = m.group(1)
         response = post(API_VIDEO_ID, json={"vid": pb_id}).json()
         self.video_id = response.get("mux", {}).get("playbackId")
-        stats_json = get(f"{API_JSON}/{pb_id}/121/stats.json").json()
-        insights_json = get(f"{API_JSON}/{pb_id}/121/insights.json").json()
+        stats_json = get(f"{API_JSON}/{pb_id}/141/0/stats.json").json()
+        insights_json = get(f"{API_JSON}/{pb_id}/141/0/insights.json").json()
         if not self.video_id or not stats_json or not insights_json:
             self.info_not_found = True
             return

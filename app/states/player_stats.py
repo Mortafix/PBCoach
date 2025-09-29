@@ -52,8 +52,8 @@ class Advice(rx.Base):
     rank: tuple[float, float]
 
 
-def parse_advice(advice_data):
-    rank_data = advice_data.get("rank_ci")
+def parse_advice(advice_data, version):
+    rank_data = advice_data.get("rank_ci" if version == "2.9.0" else "ci")
     return Advice(
         type=advice_data.get("kind"),
         relevance=round(advice_data.get("relevance"), 2),
@@ -141,6 +141,8 @@ class PlayerState(OverviewState):
     def on_load(self):
         player_id = int(self.player_id)
         self.player_name = self.match.players_full[player_id]
+        v_stats = self.match_stats.get("version")
+        v_insights = self.match_insights.get("version")
         # player stats
         data = self.match_stats.get("players")[player_id]
         self.distance = int(to_metric(data.get("total_distance_covered")))
@@ -181,7 +183,7 @@ class PlayerState(OverviewState):
         self.backhands = shot_stats(data, "backhands")
         self.hands = self._to_pie_data_multiple(self.forehands, self.backhands)
         advices_data = [
-            parse_advice(data)
+            parse_advice(data, v_insights)
             for data in self.match_insights.get("coach_advice")[player_id].get("advice")
         ]
         self.advices = sorted(advices_data, key=lambda el: -el.relevance)[:2]

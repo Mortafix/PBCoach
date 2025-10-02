@@ -16,6 +16,18 @@ def color_quality(value, scale=[59.5, 72.5, 84.5], reverse=False):
     )
 
 
+def color_quality_float(value, scale, reverse=False):
+    if reverse:
+        scale = scale[::-1]
+    if (reverse and value < scale[0]) or (not reverse and value > scale[2]):
+        return "green"
+    if (reverse and value < scale[1]) or (not reverse and value > scale[1]):
+        return "amber"
+    if (reverse and value < scale[2]) or (not reverse and value > scale[0]):
+        return "orange"
+    return "red"
+
+
 def to_metric(imperial_value, velocity=False):
     if velocity:
         return imperial_value * 1.609344
@@ -104,6 +116,7 @@ SINGLE_SHOTS = [
     "poaches",
 ]
 
+REVERSE_DEEP_SHOTS = ["drops", "dinks", "third_drops", "resets"]
 AGGRESSIVE_SHOTS = ["drives", "poaches", "third_drives", "speedups", "poaches"]
 DEFENSIVE_SHOTS = ["drops", "dinks", "third_drops", "resets", "lobs"]
 

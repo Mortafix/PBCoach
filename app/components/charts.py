@@ -137,3 +137,25 @@ def accuracy_area_chart(icon="", title="", data=None, state=None) -> rx.Componen
         align="center",
         min_width="15rem",
     )
+
+
+def base_bar_chart(icon="", title="", data=None):
+    return rx.vstack(
+        rx.cond(
+            title, rx.hstack(chart_title(icon, title), width="100%", justify="center")
+        ),
+        rx.recharts.bar_chart(
+            rx.recharts.bar(data_key="value", name="Arrivo in Kitchen"),
+            rx.recharts.x_axis(data_key="name", tick=False),
+            rx.recharts.y_axis(domain=[0, 100]),
+            rx.recharts.graphing_tooltip(separator=" : %"),
+            data=data,
+            stack_offset="none",
+            width="100%",
+            height=250,
+        ),
+        width="100%",
+        flex="1 1 45%",
+        align="center",
+        min_width="15rem",
+    )

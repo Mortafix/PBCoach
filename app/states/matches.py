@@ -12,6 +12,7 @@ setlocale(LC_TIME, "it_IT.UTF-8")
 
 
 class MatchesState(State):
+    matches_loading: bool = False
     matches: list[Partita] = []
     players: list[tuple[int, str]] = []
     locations: list[tuple[int, str]] = []
@@ -20,6 +21,8 @@ class MatchesState(State):
 
     @rx.event
     def on_load(self):
+        self.matches_loading = True
+        yield
         self.match = None
         self.are_filters_set = False
         self.matches = get_all_matches(sort=[("info.date", -1)])
@@ -32,11 +35,15 @@ class MatchesState(State):
             for location in get_all_locations(sort=[("name", 1)], parse=True)
         ]
         self.months = list(get_months_matches().items())
+        self.matches_loading = False
 
     @rx.event
     def chips_update(self):
+        self.matches_loading = True
+        yield
         filters = self.build_filters()
         self.matches = get_all_matches(filters, sort=[("info.date", -1)])
+        self.matches_loading = False
 
     @rx.event
     def build_filters(self):
@@ -66,6 +73,9 @@ class MatchesState(State):
 
     @rx.event
     def reset_filters(self):
+        self.matches_loading = True
+        yield
         self.selected_items.clear()
         self.are_filters_set = False
         self.matches = get_all_matches(sort=[("info.date", -1)])
+        self.matches_loading = False

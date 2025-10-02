@@ -3,11 +3,15 @@ from datetime import datetime
 from re import split
 
 import reflex as rx
-from app.database.data import (AGGRESSIVE_SHOTS, DEFENSIVE_SHOTS, SINGLE_SHOTS,
-                               shots_name_italian, to_metric)
+from app.database.data import (AGGRESSIVE_SHOTS, DEFENSIVE_SHOTS,
+                               REVERSE_DEEP_SHOTS, SINGLE_SHOTS,
+                               color_quality_float, shots_name_italian,
+                               to_metric)
 from app.database.matches import Partita, get_all_matches
 from app.database.players import get_player_gender_from_db, get_player_name
 from app.database.stats import get_matches_insights, get_matches_stats
+from app.states.player_stats import (Shot, shot_stats, to_pie_data_inout,
+                                     to_pie_data_multiple)
 from app.templates.base import State
 
 
@@ -26,17 +30,8 @@ class PlayerPage(rx.Base):
     faults_net: list[float]
     faults_out: list[float]
     shots: dict[str, int]
-    serves_speed: list[float]
-    serves_fastest: float
-    serves_success: list[float]
-    serves_net: list[float]
-    serves_out: list[float]
-    serves_deep: list[float]
+    shots_data: dict[str, Shot]
     serves_kitchen: list[float]
-    returns_success: list[float]
-    returns_net: list[float]
-    returns_out: list[float]
-    returns_deep: list[float]
     returns_kitchen: list[float]
     shots_aggressive: int
     shots_defensive: int
@@ -48,9 +43,14 @@ class PlayerPage(rx.Base):
     pie_rallies: list[dict]
     pie_shots_type: list[dict]
     pie_shots: list[dict]
+    pie_thirds: list[dict]
+    pie_hands: list[dict]
     # area chart
     area_quality: list[dict]
     area_accuracy: list[dict[str, int]]
+    # bar chart
+    bar_kitchen_serves: list[dict]
+    bar_kitchen_returns: list[dict]
 
 
 def to_pie_base(green_data, red_data, labels, colors=["green", "red"]):
@@ -85,8 +85,8 @@ def to_pie_shot(shots):
     ]
 
 
-def to_area_base(names, data):
-    names_axis: list[str] = list()
+def _unique_names(names):
+    names_axis = list()
     already_seen = list()
     for name in names:
         unique_name = name
@@ -97,8 +97,26 @@ def to_area_base(names, data):
             unique_name = f"{name} ({count + 1})"
         names_axis.append(unique_name)
         already_seen.append(name)
+    return names_axis
+
+
+def to_area_base(names, data):
+    names_axis: list[str] = _unique_names(names)
     res = [{"name": name, "value": val} for name, val in zip(names_axis, data) if val]
     return res + [res[-1]]
+
+
+def to_bar_base(names, data, scale):
+    names_axis: list[str] = _unique_names(names)
+    return [
+        {
+            "name": name,
+            "value": value,
+            "fill": rx.color(color_quality_float(value, scale=scale), 8),
+            "stroke": None,
+        }
+        for name, value in zip(names_axis, data)
+    ]
 
 
 def to_area_accuracy(names, net_data, out_data):
@@ -114,8 +132,10 @@ def to_area_accuracy(names, net_data, out_data):
 def parse_model(names, matches, won, allenamenti, teammates, data):
     distance = sum(data.get("distance"))
     shots = {
-        shot: data.get("shots").get(shot)
-        for shot in sorted(data.get("shots"), key=lambda el: -data.get("shots").get(el))
+        shot: data.get("shots_type").get(shot)
+        for shot in sorted(
+            data.get("shots_type"), key=lambda el: -data.get("shots_type").get(el)
+        )
     }
     shots_count = data.get("shots_aggressive") + data.get("shots_defensive")
     shots_type_diff = data.get("shots_aggressive") - data.get("shots_defensive")
@@ -139,17 +159,8 @@ def parse_model(names, matches, won, allenamenti, teammates, data):
         faults_net=data.get("faults_net"),
         faults_out=data.get("faults_out"),
         shots=shots,
-        serves_speed=data.get("serves_speed"),
-        serves_fastest=data.get("serves_fastest"),
-        serves_success=data.get("serves_success"),
-        serves_net=data.get("serves_net"),
-        serves_out=data.get("serves_out"),
-        serves_deep=data.get("serves_deep"),
+        shots_data=data.get("aggregate_shots"),
         serves_kitchen=data.get("serves_kitchen"),
-        returns_success=data.get("returns_success"),
-        returns_net=data.get("returns_net"),
-        returns_out=data.get("returns_out"),
-        returns_deep=data.get("returns_deep"),
         returns_kitchen=data.get("returns_kitchen"),
         shots_aggressive=data.get("shots_aggressive"),
         shots_defensive=data.get("shots_defensive"),
@@ -175,10 +186,46 @@ def parse_model(names, matches, won, allenamenti, teammates, data):
             colors=["indigo", "crimson"],
         ),
         pie_shots=to_pie_shot(shots),
+        pie_thirds=to_pie_data_multiple(
+            ["blue", "tomato", "plum"],
+            data.get("aggregate_shots").get("third_drives"),
+            data.get("aggregate_shots").get("third_drops"),
+            data.get("aggregate_shots").get("third_lobs"),
+        ),
+        pie_hands=to_pie_data_multiple(
+            ["blue", "tomato"],
+            data.get("aggregate_shots").get("forehands"),
+            data.get("aggregate_shots").get("backhands"),
+        ),
         area_quality=to_area_base(names, [round(q * 100) for q in data.get("quality")]),
         area_accuracy=to_area_accuracy(
             names, data.get("faults_net"), data.get("faults_out")
         ),
+        bar_kitchen_serves=to_bar_base(names, data.get("serves_kitchen"), [40, 50, 70]),
+        bar_kitchen_returns=to_bar_base(
+            names, data.get("returns_kitchen"), [90, 92.5, 96]
+        ),
+    )
+
+
+def aggregate_multiple_shots(shots):
+    n = len(shots)
+    out_p = round(sum(data.out for data in shots) / n)
+    net_p = round(sum(data.net for data in shots) / n)
+    success_p = max(100 - (out_p + net_p), 0)
+    return Shot(
+        name=shots[0].name,
+        count=sum(data.count for data in shots),
+        quality=round(sum(data.quality for data in shots) / n),
+        success=success_p,
+        out=out_p,
+        net=net_p,
+        baseline_distance=round(sum(data.baseline_distance for data in shots) / n, 2),
+        net_height=int(sum(data.net_height for data in shots) / n),
+        speed=round(sum(data.speed for data in shots) / n),
+        fastest=max(data.fastest for data in shots),
+        is_reverse_deep=shots[0].is_reverse_deep,
+        pie_inout=to_pie_data_inout(success_p, out_p, net_p),
     )
 
 
@@ -198,6 +245,9 @@ class PlayerState(State):
     show_quality_trend: bool = False
     stack_accuracy: bool = True
     keywords: list[str] = []
+    current_shot: Shot | None = None
+    info_shots: list[Shot] = []
+    zero_shots: list[Shot] = []
 
     def _get_unique_events(self, all_events):
         unique_event, prev_date, prev_norm = list(), datetime.min, ""
@@ -216,6 +266,10 @@ class PlayerState(State):
                 unique_event[-1][1].append(match)
 
         return unique_event
+
+    @rx.event
+    def change_shot(self, shot: Shot):
+        self.current_shot = shot
 
     @rx.event
     def set_event_search(self, value: str):
@@ -333,16 +387,9 @@ class PlayerState(State):
             "faults_out": [],
             "accuracy": [],
             "shots": [],
-            "serves_speed": [],
-            "serves_success": [],
-            "serves_net": [],
-            "serves_out": [],
-            "serves_deep": [],
+            "forehands": [],
+            "backhands": [],
             "serves_kitchen": [],
-            "returns_success": [],
-            "returns_net": [],
-            "returns_out": [],
-            "returns_deep": [],
             "returns_kitchen": [],
         }
         for stat in stats:
@@ -361,57 +408,40 @@ class PlayerState(State):
             accuracy = []
             shots = {}
             for shot in SINGLE_SHOTS:
-                shot_data = p_stat.get(shot)
-                shots[shot] = shot_data.get("count")
-                outcome = shot_data.get("outcome_stats", {})
-                shot_acc = outcome.get("success_percentage", 0)
-                if not shot_acc:
-                    continue
-                accuracy.append(shot_acc)
+                shots[shot] = shot_stats(p_stat, shot, shot in REVERSE_DEEP_SHOTS)
+                if shot_accuracy := shots[shot].success:
+                    accuracy.append(shot_accuracy)
             data["accuracy"].append(sum(accuracy) / len(accuracy))
             data["shots"].append(shots)
-            serve_data = p_stat.get("serves")
-            serve_speed_data = serve_data.get("speed_stats")
-            data["serves_speed"].append(
-                to_metric(serve_speed_data.get("average"), velocity=True)
-            )
-            data["serves_fastest"] = max(
-                to_metric(serve_speed_data.get("fastest"), velocity=True),
-                data.get("serves_fastest", 0),
-            )
-            serve_outcome = serve_data.get("outcome_stats")
-            data["serves_success"].append(serve_outcome.get("success_percentage"))
-            data["serves_out"].append(serve_outcome.get("out_fault_percentage"))
-            data["serves_net"].append(serve_outcome.get("net_fault_percentage"))
-            data["serves_deep"].append(
-                to_metric(serve_data.get("average_baseline_distance"))
-            )
-            return_data = p_stat.get("returns")
-            return_outcome = return_data.get("outcome_stats")
-            data["returns_success"].append(return_outcome.get("success_percentage"))
-            data["returns_out"].append(return_outcome.get("out_fault_percentage"))
-            data["returns_net"].append(return_outcome.get("net_fault_percentage"))
-            data["returns_deep"].append(
-                to_metric(return_data.get("average_baseline_distance"))
-            )
+            data["forehands"].append(shot_stats(p_stat, "forehands"))
+            data["backhands"].append(shot_stats(p_stat, "backhands"))
+            # kitchen
             role_stats = p_stat.get("role_stats")
-            serve_kitchen = role_stats.get("serving").get("oneself")
-            data["serves_kitchen"].append(
-                serve_kitchen.get("kitchen_arrival") / serve_kitchen.get("total")
+            serves_d = role_stats.get("serving").get("oneself")
+            serves_kitchen_p = serves_d.get("kitchen_arrival") / serves_d.get("total")
+            data["serves_kitchen"].append(round(serves_kitchen_p * 100))
+            return_d = role_stats.get("receiving").get("oneself")
+            returns_kitchen_p = return_d.get("kitchen_arrival") / return_d.get("total")
+            data["returns_kitchen"].append(round(returns_kitchen_p * 100))
+        # aggregate shots
+        aggregate_shots = {}
+        for shot in SINGLE_SHOTS:
+            aggregate_shots[shot] = aggregate_multiple_shots(
+                [m_data[shot] for m_data in data.get("shots")]
             )
-            return_kitchen = role_stats.get("receiving").get("oneself")
-            data["returns_kitchen"].append(
-                return_kitchen.get("kitchen_arrival") / return_kitchen.get("total")
-            )
+        aggregate_shots["forehands"] = aggregate_multiple_shots(data.get("forehands"))
+        aggregate_shots["backhands"] = aggregate_multiple_shots(data.get("backhands"))
+        data["aggregate_shots"] = aggregate_shots
+        # shots type
         shots_count = Counter(
             [
                 elem
-                for shot_data in data.get("shots", [])
-                for shot, count in shot_data.items()
-                for elem in [shot] * count
+                for single_match_data in data.get("shots", [])
+                for shot, single_shot_data in single_match_data.items()
+                for elem in [shot] * single_shot_data.count
             ]
         )
-        data["shots"] = shots_count
+        data["shots_type"] = shots_count
         aggressive_shots = sum(shots_count.get(shot, 0) for shot in AGGRESSIVE_SHOTS)
         defensive_shots = sum(shots_count.get(shot, 0) for shot in DEFENSIVE_SHOTS)
         data["shots_aggressive"] = aggressive_shots
@@ -429,3 +459,11 @@ class PlayerState(State):
         self.player = parse_model(
             names, matches_n, matches_won, allenamenti_n, teammates, data
         )
+        # ---- single shot analysis
+        self.current_shot = data["aggregate_shots"]["serves"]
+        info_shots = [
+            data["aggregate_shots"][shot]
+            for shot in SINGLE_SHOTS + ["forehands", "backhands"]
+        ]
+        self.info_shots = sorted(info_shots, key=lambda el: -el.quality)
+        self.zero_shots = [shot for shot in info_shots if shot.count == 0]

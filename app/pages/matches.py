@@ -119,6 +119,15 @@ def matches_page() -> rx.Component:
             width="100%",
             padding_inline="1rem",
         ),
+        rx.cond(
+            MatchesState.matches_loading,
+            rx.hstack(
+                rx.spinner(size="3"),
+                rx.text("Caricamento partite", color_scheme="gray"),
+                align="center",
+                spacing="2",
+            ),
+        ),
         rx.hstack(
             rx.foreach(MatchesState.matches, match_item),
             align="center",

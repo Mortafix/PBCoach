@@ -78,6 +78,19 @@ def to_pie_data_inout(success, out, net):
     ]
 
 
+def to_pie_data_multiple(colors, *shots):
+    return [
+        {
+            "name": shot.name,
+            "value": int(shot.count),
+            "fill": rx.color(colors[i], 8),
+            "stroke": None,
+        }
+        for i, shot in enumerate(shots)
+        if shot.count
+    ]
+
+
 class PlayerState(OverviewState):
     colors: list[str] = ["blue", "tomato", "plum"]
     player_name: str = ""
@@ -112,18 +125,6 @@ class PlayerState(OverviewState):
     zero_shots: list[Shot] = []
     current_shot: Shot | None = None
     current_advice: str = ""
-
-    def _to_pie_data_multiple(self, *shots):
-        return [
-            {
-                "name": shot.name,
-                "value": int(shot.count),
-                "fill": rx.color(self.colors[i], 8),
-                "stroke": None,
-            }
-            for i, shot in enumerate(shots)
-            if shot.count
-        ]
 
     @rx.event
     def change_shot(self, shot: Shot):
@@ -171,17 +172,17 @@ class PlayerState(OverviewState):
         self.smashes = shot_stats(data, "smashes")
         self.third_drives = shot_stats(data, "third_drives")
         self.third_drops = shot_stats(data, "third_drops", reverse_deep=True)
-        self.third_lobs = shot_stats(data, "third_lobs", reverse_deep=True)
-        self.thirds = self._to_pie_data_multiple(
-            self.third_drives, self.third_drops, self.third_lobs
+        self.third_lobs = shot_stats(data, "third_lobs")
+        self.thirds = to_pie_data_multiple(
+            self.colors, self.third_drives, self.third_drops, self.third_lobs
         )
-        self.resets = shot_stats(data, "resets")
+        self.resets = shot_stats(data, "resets", reverse_deep=True)
         self.speedups = shot_stats(data, "speedups")
         self.passing = shot_stats(data, "passing")
         self.poaches = shot_stats(data, "poaches")
         self.forehands = shot_stats(data, "forehands")
         self.backhands = shot_stats(data, "backhands")
-        self.hands = self._to_pie_data_multiple(self.forehands, self.backhands)
+        self.hands = to_pie_data_multiple(self.colors, self.forehands, self.backhands)
         advices_data = [
             parse_advice(data, v_insights)
             for data in self.match_insights.get("coach_advice")[player_id].get("advice")
@@ -205,7 +206,7 @@ class PlayerState(OverviewState):
             self.forehands,
             self.backhands,
         ]
-        self.info_shots = sorted(info_shots, key=lambda el: el.quality)
+        self.info_shots = sorted(info_shots, key=lambda el: -el.quality)
         self.zero_shots = [shot for shot in info_shots if shot.count == 0]
         self.change_advice(self.advices[0])
 

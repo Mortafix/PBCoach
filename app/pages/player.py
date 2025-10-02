@@ -1,13 +1,18 @@
 import reflex as rx
 from app.components.cards import card
-from app.components.charts import (accuracy_area_chart, base_pie_chart,
-                                   quality_area_chart)
+from app.components.charts import (accuracy_area_chart, base_bar_chart,
+                                   base_pie_chart, quality_area_chart)
 from app.components.expanders import expander
 from app.components.extra import page_loading
 from app.components.input import btn_text_icon
 from app.components.match import match_score, match_title
 from app.components.player import gender_color, player_item
+from app.components.shots import custom_item
+from app.database.data import color_quality
+from app.pages.player_stats import (info_element, multiple_shot_item,
+                                    single_shot_item)
 from app.states.player import PlayerState
+from app.states.player_stats import Shot
 from app.templates import template
 
 # ---- UI
@@ -139,6 +144,28 @@ def match_preview(partita):
         _hover={"border": "2px solid", "border-color": rx.color("amber", 9)},
         on_click=rx.redirect(f"/match/{partita.code}/overview"),
     )
+
+
+def shot_select(shot: Shot) -> rx.Component:
+    qual_shot_color = color_quality(shot.quality)
+    btn = rx.button(
+        rx.hstack(
+            shot.name,
+            rx.icon(
+                "dot",
+                size=50,
+                color=rx.color(qual_shot_color, 9),
+                margin_inline="-1rem",
+            ),
+            spacing="0",
+            align="center",
+        ),
+        variant="soft",
+        color_scheme="gray",
+        cursor="pointer",
+        on_click=PlayerState.change_shot(shot),
+    )
+    return rx.cond(shot.count > 0, btn, None)
 
 
 # ---- PAGE
@@ -291,6 +318,72 @@ def players_selection() -> rx.Component:
             ),
             width="100%",
         ),
+        rx.hstack(
+            card(
+                rx.hstack(
+                    single_shot_item(
+                        "arrow-up-from-line", "Servizi", player.shots_data["serves"]
+                    ),
+                    single_shot_item(
+                        "arrow-down-from-line", "Risposte", player.shots_data["returns"]
+                    ),
+                    spacing="5",
+                    align="center",
+                    justify="between",
+                    width="100%",
+                    wrap="wrap",
+                ),
+                width="100%",
+                flex="1 1 49%",
+            ),
+            card(
+                rx.hstack(
+                    multiple_shot_item(
+                        "dice-3",
+                        "Terzo colpo",
+                        player.pie_thirds,
+                        [
+                            player.shots_data["third_drives"],
+                            player.shots_data["third_drops"],
+                            player.shots_data["third_lobs"],
+                        ],
+                    ),
+                    multiple_shot_item(
+                        "flame",
+                        "Colpi",
+                        player.pie_hands,
+                        [
+                            player.shots_data["forehands"],
+                            player.shots_data["backhands"],
+                        ],
+                    ),
+                    spacing="5",
+                    align="start",
+                    justify="between",
+                    width="100%",
+                    wrap="wrap",
+                ),
+                width="100%",
+                flex="1 1 49%",
+            ),
+            width="100%",
+            wrap="wrap",
+        ),
+        card(
+            rx.hstack(
+                base_bar_chart(
+                    "chef-hat", "Kitchen al Servizio", player.bar_kitchen_serves
+                ),
+                base_bar_chart(
+                    "chef-hat", "Kitchen alla Risposta", player.bar_kitchen_returns
+                ),
+                width="100%",
+                align="center",
+                justify_content="space-evenly",
+                wrap="wrap",
+            ),
+            width="100%",
+        ),
         rx.cond(
             player.matches > 1,
             card(
@@ -308,6 +401,38 @@ def players_selection() -> rx.Component:
                 ),
                 width="100%",
             ),
+        ),
+        card(
+            rx.vstack(
+                rx.hstack(
+                    rx.foreach(PlayerState.info_shots, shot_select),
+                    width="100%",
+                    wrap="wrap",
+                    align="center",
+                ),
+                rx.cond(
+                    PlayerState.zero_shots,
+                    rx.hstack(
+                        rx.text("Colpi ", rx.text.strong("non"), " eseguiti: "),
+                        rx.foreach(
+                            PlayerState.zero_shots,
+                            lambda shot: rx.badge(shot.name, color_scheme="gray"),
+                        ),
+                        spacing="1",
+                        align="center",
+                    ),
+                ),
+                rx.cond(
+                    PlayerState.current_shot,
+                    rx.vstack(
+                        rx.divider(),
+                        info_element(PlayerState.current_shot),
+                        width="100%",
+                    ),
+                ),
+                width="100%",
+            ),
+            width="100%",
         ),
         expander(
             rx.hstack(

@@ -93,14 +93,21 @@ def render_type_badge(player_type):
             player_type,
             ("Bilanciato", badge("purple")),
             ("Aggressivo", badge("indigo")),
-            ("Bilanciato", badge("crimson")),
+            ("Difensivo", badge("crimson")),
         ),
     )
 
 
 def render_teammate(player):
     return rx.hstack(
-        player_item(player[0], PlayerState.player.teammates_name.get(player[0])),
+        rx.box(
+            player_item(player[0], PlayerState.player.teammates_name.get(player[0])),
+            on_click=rx.redirect(f"/player/{player[0]}"),
+            cursor="pointer",
+            padding="0.2em 0.5em",
+            border_radius="1em",
+            _hover={"bg": rx.color("gray", 3)},
+        ),
         rx.text(
             rx.code(player[1], color_scheme="gray"),
             rx.cond(player[1] > 1, " partite", " partita"),

@@ -155,7 +155,7 @@ def parse_model(names, matches, won, allenamenti, teammates, data):
         shots_defensive=data.get("shots_defensive"),
         player_type=(
             "Bilanciato"
-            if shots_type_diff / shots_count < 0.1
+            if abs(shots_type_diff / shots_count) < 0.125
             else ["Difensivo", "Aggressivo"][shots_type_diff > 0]
         ),
         rallies_total=data.get("rallies_total"),

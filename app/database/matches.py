@@ -11,6 +11,7 @@ setlocale(LC_TIME, "it_IT.UTF-8")
 
 class Partita(rx.Base):
     code: str
+    id: str | None
     name: str
     date: datetime
     date_str: str
@@ -45,6 +46,7 @@ def parse_model(data):
     score = data.get("game", {}).get("game_outcome")
     return Partita(
         code=data.get("code"),
+        id=data.get("pbvision-id"),
         name=data.get("info").get("name"),
         date=data.get("info").get("date"),
         date_str=format(data.get("info").get("date"), "%A • %d %B %y • %H:%M"),

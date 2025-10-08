@@ -101,6 +101,29 @@ def advice_button(advice, index) -> rx.Component:
     )
 
 
+def render_rating(attribute, icon):
+    val = PlayerState.ratings[attribute]
+    return rx.vstack(
+        rx.hstack(
+            rx.icon(icon),
+            rx.text(attribute),
+            spacing="2",
+            align="center",
+            opacity=0.75,
+        ),
+        rx.text(val, size="8"),
+        spacing="0",
+        justify="center",
+        align="center",
+        bg=rx.color("gray", 3),
+        padding="0.2em 0.5em",
+        border_radius="0.5em",
+    )
+
+
+# ------- PAGE
+
+
 @template(
     route="/match/[match_id]/player/[player_id]",
     title="Statistiche Giocatore",
@@ -120,6 +143,64 @@ def team_page() -> rx.Component:
                 "user",
                 f"Statistiche di {PlayerState.player_name} • {PlayerState.match.name}",
             ),
+        ),
+        rx.cond(
+            PlayerState.avatar_id >= 0,
+            rx.hstack(
+                rx.foreach(
+                    range(8),
+                    lambda index: rx.image(
+                        src=f"{PlayerState.partial_image_url}-{index}.jpg",
+                        width="100px",
+                        height="auto",
+                        border_radius="1em",
+                    ),
+                ),
+                width="100%",
+                overflow="auto",
+            ),
+        ),
+        card(
+            rx.vstack(
+                rx.hstack(
+                    rx.vstack(
+                        rx.text("Generale", color_scheme="amber", opacity=0.65),
+                        rx.text(
+                            PlayerState.ratings["Generale"],
+                            size="8",
+                            color_scheme="amber",
+                        ),
+                        spacing="0",
+                        justify="center",
+                        align="center",
+                        bg=rx.color("amber", 3),
+                        padding="0.2em 0.5em",
+                        border_radius="0.5em",
+                    ),
+                    render_rating("Servizio", "arrow-up-from-line"),
+                    render_rating("Risposta", "arrow-down-from-line"),
+                    render_rating("Agilità", "rabbit"),
+                    render_rating("Attacco", "swords"),
+                    render_rating("Difesa", "shield-ban"),
+                    render_rating("Consistenza", "brick-wall"),
+                    width="100%",
+                    wrap="wrap",
+                    justify_content="space-evenly",
+                ),
+                rx.spacer(),
+                rx.spacer(),
+                rx.text(
+                    "Il sistema di rating (in versione ",
+                    rx.code("BETA"),
+                    ") si basa su diversi fattori con un range da 2 a 7.",
+                    color_scheme="gray",
+                    size="2",
+                ),
+                width="100%",
+                align="center",
+                spacing="2",
+            ),
+            width="100%",
         ),
         card(
             rx.hstack(

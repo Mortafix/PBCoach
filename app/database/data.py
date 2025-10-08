@@ -34,6 +34,24 @@ def to_metric(imperial_value, velocity=False):
     return imperial_value * 0.3048
 
 
+# ---- RATINGS
+
+
+def calculate_ratings(data):
+    def to_real_rating(value):
+        return round(value * 6 + 2, 1)  # [0,1] -> [2,8]
+
+    return {
+        "Servizio": to_real_rating(data.get("serve")),
+        "Risposta": to_real_rating(data.get("return")),
+        "Attacco": to_real_rating(data.get("offense")),
+        "Difesa": to_real_rating(data.get("defense")),
+        "Agilità": to_real_rating(data.get("agility")),
+        "Consistenza": to_real_rating(data.get("consistency")),
+        "Generale": to_real_rating(data.get("overall")),
+    }
+
+
 # ---- ITALIAN
 
 

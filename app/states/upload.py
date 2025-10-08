@@ -79,9 +79,9 @@ class UploadState(State):
         base_client_dir = path.join(rx.get_upload_dir(), self.code)
         if not path.exists(base_client_dir):
             makedirs(base_client_dir)
-        data = {"code": self.code} | stats_json
+        data = {"code": self.code, "pbvision-id": pb_id} | stats_json
         dump(data, open(path.join(base_client_dir, "stats.json"), "w+"))
-        data = {"code": self.code} | insights_json
+        data = {"code": self.code, "pbvision-id": pb_id} | insights_json
         dump(data, open(path.join(base_client_dir, "insights.json"), "w+"))
         self.loading_info = False
         self.info_found = True

@@ -1,7 +1,7 @@
 from os import path
 
 import reflex as rx
-from app.database.data import shots_name_italian, to_metric
+from app.database.data import calculate_ratings, shots_name_italian, to_metric
 from app.states.overview import OverviewState
 
 # ---- MODELS
@@ -120,11 +120,20 @@ class PlayerState(OverviewState):
     backhands: Shot = None
     hands: list[dict] = []
     advices: list[Advice] = []
+    ratings: dict[str, float] = {}
     # ---- page
+    avatar_id: int
     info_shots: list[Shot] = []
     zero_shots: list[Shot] = []
     current_shot: Shot | None = None
     current_advice: str = ""
+
+    @rx.var
+    def partial_image_url(self) -> str:
+        if not self.match:
+            return ""
+        google_url = "https://storage.googleapis.com/pbv-pro"
+        return f"{google_url}/{self.match.id}/141/player{self.avatar_id}"
 
     @rx.event
     def change_shot(self, shot: Shot):
@@ -142,8 +151,13 @@ class PlayerState(OverviewState):
     def on_load(self):
         player_id = int(self.player_id)
         self.player_name = self.match.players_full[player_id]
-        v_stats = self.match_stats.get("version")
+        # v_stats = self.match_stats.get("version")  # not used
         v_insights = self.match_insights.get("version")
+        player_insights = self.match_insights.get("player_data")[player_id]
+        self.avatar_id = player_insights.get("avatar_id", -1)
+        # player ranking
+        if ratings_data := player_insights.get("trends", {}).get("ratings"):
+            self.ratings = calculate_ratings(ratings_data)
         # player stats
         data = self.match_stats.get("players")[player_id]
         self.distance = int(to_metric(data.get("total_distance_covered")))

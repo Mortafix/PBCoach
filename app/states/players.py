@@ -15,9 +15,8 @@ class PlayersState(State):
     players: list[Player] = []
     is_search_active: bool = False
     players_played: dict[int, int] = {}
-    players_quality: dict[int, int] = {}
-    players_quality_history: dict[int, list[int]] = {}
-    players_quality_chart_data: dict[int, list] = {}
+    players_rating: dict[int, float] = {}
+    players_rating_history: dict[int, list[int]] = {}
 
     @rx.event
     def on_load(self):
@@ -28,11 +27,7 @@ class PlayersState(State):
         self.is_search_active = False
         self.players = get_all_players(sort=[("name", 1), ("surname", 1)], parse=True)
         stats = get_players_general_stats()
-        self.players_played, self.players_quality, self.players_quality_history = stats
-        self.players_quality_chart_data = {
-            player: [{"x": i, "y": valore} for i, valore in enumerate(history[:10])]
-            for player, history in self.players_quality_history.items()
-        }
+        self.players_played, self.players_rating, self.players_rating_history = stats
 
     @rx.event
     def reset_search(self):
@@ -68,10 +63,10 @@ class PlayersState(State):
             self.players = get_all_players(
                 sort=[("name", sort_dir), ("surname", sort_dir)], parse=True
             )
-        if self.sorting_attr == "Qualità":
+        if self.sorting_attr == "Rating":
             self.players = sorted(
                 get_all_players(parse=True),
-                key=lambda player: self.players_quality.get(player.id, 0),
+                key=lambda player: self.players_rating.get(player.id, 0),
                 reverse=self.sorting_asc,
             )
         if self.sorting_attr == "Partite":

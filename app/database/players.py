@@ -1,5 +1,6 @@
 import reflex as rx
 from app.database.connection import DB
+from app.database.data import calculate_ratings
 
 
 class Player(rx.Base):
@@ -63,25 +64,44 @@ def get_player_name(player_id, short=False, only_name=False):
 
 def get_players_general_stats():
     played = dict()
-    qualities = dict()
-    qualities_hist = dict()
-    for match in DB.stats.find(
-        {"info.type": {"$ne": "Allenamento"}}, sort=[("info.date", 1)]
-    ):
+    ratings = dict()
+    rating_hist = dict()
+    pipeline = [
+        {"$match": {"info.type": {"$ne": "Allenamento"}}},
+        {
+            "$lookup": {
+                "from": "insights",
+                "let": {"matchCode": "$code"},
+                "pipeline": [
+                    {"$match": {"$expr": {"$eq": ["$code", "$$matchCode"]}}},
+                    {"$project": {"_id": 0, "player_data": 1}},
+                ],
+                "as": "insights",
+            }
+        },
+        {"$unwind": "$insights"},
+        {"$sort": {"info.date": 1}},
+    ]
+    for match in DB.stats.aggregate(pipeline):
         players_stats = [stats for stats in match.get("players") if stats]
+        players_ingishts = [
+            data for data in match.get("insights").get("player_data") if data
+        ]
         players_ids = match.get("players_ids")
         for player in players_ids:
             played[player] = played.get(player, 0) + 1
-        for i, player in enumerate(players_stats):
+        for i, (player, data) in enumerate(zip(players_stats, players_ingishts)):
             player_id = players_ids[i]
-            quality = round(player.get("average_shot_quality") * 100)
-            qualities_hist[player_id] = qualities_hist.get(player_id, []) + [quality]
-    # qualita pesata sulle ultime partite
-    for player, history in qualities_hist.items():
+            player_ratings = calculate_ratings(data.get("trends", {}).get("ratings"))
+            if not (rank := player_ratings.get("Generale")):
+                continue
+            rating_hist[player_id] = rating_hist.get(player_id, []) + [rank]
+    # rating pesato sulle ultime partite
+    for player, history in rating_hist.items():
         pesi = list(range(1, len(history) + 1))
         media_ponderata = sum(v * p for v, p in zip(history, pesi)) / sum(pesi)
-        qualities[player] = round(media_ponderata)
-    return played, qualities, qualities_hist
+        ratings[player] = round(media_ponderata, 1)
+    return played, ratings, rating_hist
 
 
 def get_player_gender_from_db(player_id):

@@ -41,6 +41,8 @@ def calculate_ratings(data):
     def to_real_rating(value):
         return round(value * 6 + 2, 1)  # [0,1] -> [2,8]
 
+    if not data:
+        return {}
     return {
         "Servizio": to_real_rating(data.get("serve")),
         "Risposta": to_real_rating(data.get("return")),

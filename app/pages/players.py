@@ -3,7 +3,6 @@ from app.components.cards import card
 from app.components.extra import page_title
 from app.components.input import btn_icon
 from app.components.player import gender_color
-from app.database.data import color_quality
 from app.database.players import Player
 from app.states.players import PlayersState
 from app.templates import template
@@ -25,34 +24,12 @@ def player_item(giocatore: Player):
             ),
         )
 
-    def chart_trend():
-        return rx.recharts.line_chart(
-            rx.recharts.line(
-                data_key="y",
-                stroke=rx.color(trend_color, 9),
-                stroke_width=3,
-                dot=False,
-                type_="monotone",
-            ),
-            rx.recharts.x_axis(data_key="x", hide=True),
-            rx.recharts.y_axis(hide=True),
-            data=PlayersState.players_quality_chart_data.get(giocatore.id, []),
-            width="100%",
-            height=50,
-            margin={
-                "top": 10,
-                "right": 0,
-                "left": 20,
-                "bottom": -30,
-            },
-        )
-
     partite_giocate = PlayersState.players_played.get(giocatore.id, 0)
-    quality = PlayersState.players_quality.get(giocatore.id, 0)
-    quality_history = PlayersState.players_quality_history.get(giocatore.id, [])
-    trend_color = rx.cond(quality_history[0] > quality_history[-1], "red", "green")
+    rating = PlayersState.players_rating.get(giocatore.id, 0)
+    rating_history = PlayersState.players_rating_history.get(giocatore.id, [])
+    trend_color = rx.cond(rating_history[0] > rating_history[-1], "red", "green")
     trend_icon = rx.cond(
-        quality_history[0] > quality_history[-1], "trending-down", "trending-up"
+        rating_history[0] > rating_history[-1], "trending-down", "trending-up"
     )
     color = gender_color(giocatore.gender)
     return card(
@@ -68,29 +45,30 @@ def player_item(giocatore: Player):
             ),
             rx.divider(),
             rx.cond(
-                partite_giocate,
+                partite_giocate > 0,
                 rx.vstack(
-                    element_item("Partite", partite_giocate),
-                    element_item(
-                        "Qualità",
-                        content=rx.hstack(
-                            rx.code(
-                                f"{quality}%",
-                                size="5",
-                                color_scheme=color_quality(quality),
-                            ),
-                            rx.cond(
-                                partite_giocate > 1,
-                                rx.code(rx.icon(trend_icon), color_scheme=trend_color),
-                            ),
-                            align="center",
-                        ),
-                    ),
                     rx.cond(
-                        partite_giocate > 1,
-                        element_item("Trend", content=chart_trend()),
+                        rating > 0,
+                        element_item(
+                            "Rating",
+                            content=rx.hstack(
+                                rx.code(
+                                    rating,
+                                    size="6",
+                                    color_scheme="gray",
+                                ),
+                                rx.cond(
+                                    rating_history.length() > 1,
+                                    rx.code(
+                                        rx.icon(trend_icon), color_scheme=trend_color
+                                    ),
+                                ),
+                                align="center",
+                            ),
+                        ),
                         None,
                     ),
+                    element_item("Partite", partite_giocate),
                     spacing="2",
                     width="100%",
                 ),
@@ -167,7 +145,7 @@ def players_page() -> rx.Component:
                     ),
                 ),
                 rx.select(
-                    ["Nome", "Qualità", "Partite"],
+                    ["Nome", "Rating", "Partite"],
                     size="3",
                     width="85%",
                     value=PlayersState.sorting_attr,

@@ -130,7 +130,7 @@ class PlayerState(OverviewState):
 
     @rx.var
     def partial_image_url(self) -> str:
-        if not self.match:
+        if not self.match or not self.match.id:
             return ""
         google_url = "https://storage.googleapis.com/pbv-pro"
         return f"{google_url}/{self.match.id}/141/player{self.avatar_id}"

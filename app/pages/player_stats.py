@@ -145,7 +145,7 @@ def team_page() -> rx.Component:
             ),
         ),
         rx.cond(
-            PlayerState.avatar_id >= 0,
+            PlayerState.partial_image_url,
             rx.hstack(
                 rx.foreach(
                     range(8),

@@ -76,11 +76,17 @@ def parse_model(data):
     )
 
 
-def get_all_matches(filters=None, sort=None, limit=10**10, parse=True):
-    matches = DB.stats.find(filters, sort=sort or [("info.date", 1)], limit=limit)
+def get_all_matches(filters=None, sort=None, limit=10**10, skip=0, parse=True):
+    matches = DB.stats.find(
+        filters, sort=sort or [("info.date", 1)], limit=limit, skip=skip
+    )
     if parse:
         return [parse_model(match) for match in matches]
     return matches
+
+
+def count_matches(filters=None):
+    return DB.stats.count_documents(filters or {})
 
 
 def get_months_matches(fmt="%B %y"):

@@ -135,6 +135,20 @@ def matches_page() -> rx.Component:
             justify_content="space-evenly",
             wrap="wrap",
         ),
+        rx.cond(
+            ~MatchesState.are_filters_set
+            & ~MatchesState.matches_loading
+            & ~MatchesState.matches_total,
+            btn_text_icon(
+                "refresh-cw",
+                "Carica più partite",
+                width="100%",
+                color_scheme="gray",
+                variant="soft",
+                loading=MatchesState.more_matches_loading,
+                on_click=MatchesState.load_more_matches,
+            ),
+        ),
         spacing="5",
         width="100%",
     )

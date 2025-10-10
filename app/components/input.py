@@ -38,7 +38,7 @@ def form_header(icon, title, subtitle):
 # ---- BUTTONS
 
 
-def btn_icon(icon, icon_size=16, icon_w=3, **params):
+def btn_icon(icon, icon_size=16, icon_w=2, **params):
     return rx.button(
         rx.icon(icon, size=icon_size, stroke_width=icon_w), cursor="pointer", **params
     )
@@ -49,8 +49,8 @@ def btn_text_icon(
     text="",
     text_size="3",
     icon_size=16,
-    icon_w=3,
-    spacing="3",
+    icon_w=2,
+    spacing="2",
     reverse=False,
     **params
 ):

@@ -3,7 +3,8 @@ from locale import LC_TIME, setlocale
 
 import reflex as rx
 from app.database.locations import get_all_locations
-from app.database.matches import Partita, get_all_matches, get_months_matches
+from app.database.matches import (Partita, count_matches, get_all_matches,
+                                  get_months_matches)
 from app.database.players import get_all_players, get_player_name
 from app.templates.base import State
 from dateutil.relativedelta import relativedelta
@@ -13,19 +14,25 @@ setlocale(LC_TIME, "it_IT.UTF-8")
 
 class MatchesState(State):
     matches_loading: bool = False
+    more_matches_loading: bool = False
     matches: list[Partita] = []
     players: list[tuple[int, str]] = []
     locations: list[tuple[int, str]] = []
     months: list[tuple[str, str]] = []
     are_filters_set: bool = False
+    matches_count: int = 0
+    matches_total: bool = False
 
     @rx.event
     def on_load(self):
-        self.matches_loading = True
-        yield
         self.match = None
+        self.matches = []
+        self.matches_loading = True
         self.are_filters_set = False
-        self.matches = get_all_matches(sort=[("info.date", -1)])
+        self.matches_total = False
+        self.matches_count = count_matches()
+        yield
+        self.matches = get_all_matches(sort=[("info.date", -1)], limit=9)
         self.players = [
             (int(player.id), get_player_name(player.id))
             for player in get_all_players(sort=[("name", 1)], parse=True)
@@ -38,8 +45,21 @@ class MatchesState(State):
         self.matches_loading = False
 
     @rx.event
+    def load_more_matches(self):
+        offset = len(self.matches)
+        if offset >= self.matches_count:
+            return
+        self.more_matches_loading = True
+        yield
+        self.matches += get_all_matches(sort=[("info.date", -1)], limit=9, skip=offset)
+        self.more_matches_loading = False
+        if len(self.matches) >= self.matches_count:
+            self.matches_total = True
+
+    @rx.event
     def chips_update(self):
         self.matches_loading = True
+        self.matches = []
         yield
         filters = self.build_filters()
         self.matches = get_all_matches(filters, sort=[("info.date", -1)])
@@ -74,8 +94,10 @@ class MatchesState(State):
     @rx.event
     def reset_filters(self):
         self.matches_loading = True
+        self.matches = []
+        self.matches_total = False
         yield
         self.selected_items.clear()
         self.are_filters_set = False
-        self.matches = get_all_matches(sort=[("info.date", -1)])
+        self.matches = get_all_matches(sort=[("info.date", -1)], limit=9)
         self.matches_loading = False

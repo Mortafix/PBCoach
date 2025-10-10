@@ -5,8 +5,8 @@ from re import split
 import reflex as rx
 from app.database.data import (AGGRESSIVE_SHOTS, DEFENSIVE_SHOTS,
                                REVERSE_DEEP_SHOTS, SINGLE_SHOTS,
-                               color_quality_float, shots_name_italian,
-                               to_metric)
+                               calculate_ratings, color_quality_float,
+                               shots_name_italian, to_metric)
 from app.database.matches import Partita, get_all_matches
 from app.database.players import get_player_gender_from_db, get_player_name
 from app.database.stats import get_matches_insights, get_matches_stats
@@ -38,6 +38,8 @@ class PlayerPage(rx.Base):
     player_type: str
     rallies_total: int
     rallies_won: int
+    ratings: dict[str, float]
+    ratings_count: int
     # pie data
     pie_matches: list[dict]
     pie_rallies: list[dict]
@@ -48,6 +50,7 @@ class PlayerPage(rx.Base):
     # area chart
     area_quality: list[dict]
     area_accuracy: list[dict[str, int]]
+    area_rating: dict[str, list[dict]]
     # bar chart
     bar_kitchen_serves: list[dict]
     bar_kitchen_returns: list[dict]
@@ -100,10 +103,10 @@ def _unique_names(names):
     return names_axis
 
 
-def to_area_base(names, data):
+def to_area_base(names, data, repeat_last=False):
     names_axis: list[str] = _unique_names(names)
     res = [{"name": name, "value": val} for name, val in zip(names_axis, data) if val]
-    return res + [res[-1]]
+    return res + ([res[-1]] if repeat_last else [])
 
 
 def to_bar_base(names, data, scale):
@@ -171,6 +174,8 @@ def parse_model(names, matches, won, allenamenti, teammates, data):
         ),
         rallies_total=data.get("rallies_total"),
         rallies_won=data.get("rallies_won"),
+        ratings=data.get("ratings"),
+        ratings_count=data.get("ratings_count"),
         pie_matches=to_pie_base(
             sum(won), matches - sum(won), ["Vittoria", "Sconfitta"]
         ),
@@ -197,10 +202,19 @@ def parse_model(names, matches, won, allenamenti, teammates, data):
             data.get("aggregate_shots").get("forehands"),
             data.get("aggregate_shots").get("backhands"),
         ),
-        area_quality=to_area_base(names, [round(q * 100) for q in data.get("quality")]),
+        area_quality=to_area_base(
+            names, [round(q * 100) for q in data.get("quality")], repeat_last=True
+        ),
         area_accuracy=to_area_accuracy(
             names, data.get("faults_net"), data.get("faults_out")
         ),
+        area_rating={
+            label: to_area_base(
+                data.get("ratings_event"),
+                [event.get(label) for event in data.get("ratings_history")],
+            )
+            for label in data.get("ratings")
+        },
         bar_kitchen_serves=to_bar_base(names, data.get("serves_kitchen"), [40, 50, 70]),
         bar_kitchen_returns=to_bar_base(
             names, data.get("returns_kitchen"), [90, 92.5, 96]
@@ -236,7 +250,7 @@ class PlayerState(State):
     matches: list[Partita] = []
     player_name: str = ""
     base_db_filter: dict = {}
-    player: PlayerPage = None
+    player: PlayerPage | None
     player_gender: str = ""
     events: list[tuple[str, list[Partita]]]
     events_selected: list[tuple[str, list[Partita]]]
@@ -248,6 +262,7 @@ class PlayerState(State):
     current_shot: Shot | None = None
     info_shots: list[Shot] = []
     zero_shots: list[Shot] = []
+    current_rating_chart: str = ""
 
     def _get_unique_events(self, all_events):
         unique_event, prev_date, prev_norm = list(), datetime.min, ""
@@ -320,7 +335,14 @@ class PlayerState(State):
         self.stack_accuracy = value
 
     @rx.event
+    def select_rating_chart(self, value):
+        self.current_rating_chart = value
+
+    @rx.event
     def on_load(self):
+        self.player = None
+        yield
+        self.current_rating_chart = "Generale"
         self.matches = []
         self.player_gender = ""
         self.show_quality_trend = False
@@ -378,7 +400,10 @@ class PlayerState(State):
         codes = [match.code for match in matches if not match.is_allenamento]
         filters = {"code": {"$in": codes}}
         stats = get_matches_stats(filters, sort=[("info.date", 1)])
-        insights = get_matches_insights(filters, sort=[("info.date", 1)])
+        insights = {
+            data.get("code"): data
+            for data in get_matches_insights(filters, sort=[("info.date", 1)])
+        }
         data = {
             "distance": [],
             "quality": [],
@@ -391,8 +416,14 @@ class PlayerState(State):
             "backhands": [],
             "serves_kitchen": [],
             "returns_kitchen": [],
+            "ratings": [],
         }
+        rallies_won = []
+        ratings = []
+        ratings_event = []
+        rating_match_count = 0
         for stat in stats:
+            insight = insights.get(stat.get("code"))
             player_idx = stat.get("players_ids").index(player_id)
             if len(stat.get("players_ids")) == 2 and player_idx == 1:
                 player_idx = 2
@@ -423,6 +454,29 @@ class PlayerState(State):
             return_d = role_stats.get("receiving").get("oneself")
             returns_kitchen_p = return_d.get("kitchen_arrival") / return_d.get("total")
             data["returns_kitchen"].append(round(returns_kitchen_p * 100))
+            # insights
+            rallies = [
+                rally.get("winning_team") == team_idx
+                for rally in insight.get("rallies")
+            ]
+            rallies_won.extend(rallies)
+            p_insight = insight.get("player_data")[player_idx]
+            if rating := p_insight.get("trends", {}).get("ratings"):
+                ratings.append(calculate_ratings(rating))
+                ratings_event.append(stat.get("info").get("name"))
+                rating_match_count += 1
+        data["ratings_count"] = rating_match_count
+        data["ratings_history"] = ratings
+        data["ratings_event"] = ratings_event
+        data["rallies_total"] = len(rallies_won)
+        data["rallies_won"] = sum(rallies_won)
+        if ratings:
+            ratings_pesato = {
+                attr: sum(data.get(attr) * w for w, data in enumerate(ratings, 1))
+                / sum(range(1, len(ratings) + 1))
+                for attr in ratings[0]
+            }
+            data["ratings"] = {el: round(val, 1) for el, val in ratings_pesato.items()}
         # aggregate shots
         aggregate_shots = {}
         for shot in SINGLE_SHOTS:
@@ -446,16 +500,6 @@ class PlayerState(State):
         defensive_shots = sum(shots_count.get(shot, 0) for shot in DEFENSIVE_SHOTS)
         data["shots_aggressive"] = aggressive_shots
         data["shots_defensive"] = defensive_shots
-        # insights (sorted)
-        rallies_won = []
-        for insight in insights:
-            rallies = [
-                rally.get("winning_team") == team_idx
-                for rally in insight.get("rallies")
-            ]
-            rallies_won.extend(rallies)
-        data["rallies_total"] = len(rallies_won)
-        data["rallies_won"] = sum(rallies_won)
         self.player = parse_model(
             names, matches_n, matches_won, allenamenti_n, teammates, data
         )

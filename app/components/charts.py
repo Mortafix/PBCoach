@@ -37,6 +37,18 @@ def base_pie_chart(icon="", title="", data=None, fmt=": ", size=250) -> rx.Compo
     )
 
 
+def rating_area_chart(name, data) -> rx.Component:
+    return rx.recharts.area_chart(
+        rx.recharts.area(data_key="value", name=name),
+        rx.recharts.x_axis(data_key="name", tick=False),
+        rx.recharts.y_axis(domain=[2, 7]),
+        rx.recharts.graphing_tooltip(separator=" : "),
+        data=data[name],
+        width="100%",
+        height=250,
+    )
+
+
 def quality_area_chart(icon="", title="", data=None, state=None) -> rx.Component:
     start_val, end_val = data[0].get("value"), data[-1].get("value")
     return rx.vstack(

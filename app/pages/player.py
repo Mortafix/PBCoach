@@ -1,13 +1,13 @@
 import reflex as rx
 from app.components.cards import card
 from app.components.charts import (accuracy_area_chart, base_bar_chart,
-                                   base_pie_chart, quality_area_chart)
+                                   base_pie_chart, quality_area_chart,
+                                   rating_area_chart)
 from app.components.expanders import expander
 from app.components.extra import page_loading
 from app.components.input import btn_text_icon
 from app.components.match import match_score, match_title
 from app.components.player import gender_color, player_item
-from app.components.shots import custom_item
 from app.database.data import color_quality
 from app.pages.player_stats import (info_element, multiple_shot_item,
                                     single_shot_item)
@@ -168,6 +168,34 @@ def shot_select(shot: Shot) -> rx.Component:
     return rx.cond(shot.count > 0, btn, None)
 
 
+def render_rating_selectable(ratings, attribute, icon):
+    val = ratings[attribute]
+    return rx.vstack(
+        rx.hstack(
+            rx.icon(icon),
+            rx.text(attribute),
+            spacing="2",
+            align="center",
+            opacity=0.75,
+        ),
+        rx.text(val, size="8"),
+        spacing="0",
+        justify="center",
+        align="center",
+        bg=rx.color("gray", 3),
+        padding="0.2em 0.5em",
+        border_radius="0.5em",
+        border=rx.cond(
+            PlayerState.current_rating_chart == attribute,
+            "2px solid #FFFFFFC4",
+            "2px solid transparent",
+        ),
+        cursor="pointer",
+        _hover={"border": "2px solid #FFCA16"},
+        on_click=PlayerState.select_rating_chart(attribute),
+    )
+
+
 # ---- PAGE
 
 
@@ -177,7 +205,7 @@ def shot_select(shot: Shot) -> rx.Component:
     description="Analisi del Coach Dinky di un giocatore",
     on_load=PlayerState.on_load,
 )
-def players_selection() -> rx.Component:
+def player_page() -> rx.Component:
     player = PlayerState.player
     color = gender_color(PlayerState.player_gender)
     page = rx.vstack(
@@ -283,6 +311,7 @@ def players_selection() -> rx.Component:
             justify_content="space-evenly",
             wrap="wrap",
         ),
+        rx.cond(player.ratings_count > 0, ratings_card(player)),
         card(
             rx.vstack(
                 rx.hstack(
@@ -448,3 +477,72 @@ def players_selection() -> rx.Component:
         width="100%",
     )
     return rx.cond(player, page, page_loading())
+
+
+def ratings_card(player) -> rx.Component:
+    return card(
+        rx.vstack(
+            rx.hstack(
+                rx.vstack(
+                    rx.text("Generale", color_scheme="amber", opacity=0.65),
+                    rx.text(
+                        player.ratings["Generale"],
+                        size="8",
+                        color_scheme="amber",
+                    ),
+                    spacing="0",
+                    justify="center",
+                    align="center",
+                    bg=rx.color("amber", 3),
+                    padding="0.2em 0.5em",
+                    border_radius="0.5em",
+                    border="2px solid transparent",
+                    cursor="pointer",
+                    _hover={"border": "2px solid #FFCA16"},
+                    on_click=PlayerState.select_rating_chart("Generale"),
+                ),
+                render_rating_selectable(
+                    player.ratings, "Servizio", "arrow-up-from-line"
+                ),
+                render_rating_selectable(
+                    player.ratings, "Risposta", "arrow-down-from-line"
+                ),
+                render_rating_selectable(player.ratings, "Agilità", "rabbit"),
+                render_rating_selectable(player.ratings, "Attacco", "swords"),
+                render_rating_selectable(player.ratings, "Difesa", "shield-ban"),
+                render_rating_selectable(player.ratings, "Consistenza", "brick-wall"),
+                width="100%",
+                wrap="wrap",
+                justify_content="space-evenly",
+            ),
+            rx.spacer(),
+            rx.spacer(),
+            rx.cond(
+                player.ratings_count > 1,
+                rx.match(
+                    PlayerState.current_rating_chart,
+                    ("Generale", rating_area_chart("Generale", player.area_rating)),
+                    ("Servizio", rating_area_chart("Servizio", player.area_rating)),
+                    ("Risposta", rating_area_chart("Risposta", player.area_rating)),
+                    ("Agilità", rating_area_chart("Agilità", player.area_rating)),
+                    ("Attacco", rating_area_chart("Attacco", player.area_rating)),
+                    ("Difesa", rating_area_chart("Difesa", player.area_rating)),
+                    (
+                        "Consistenza",
+                        rating_area_chart("Consistenza", player.area_rating),
+                    ),
+                ),
+            ),
+            rx.text(
+                "Il sistema di rating (in versione ",
+                rx.code("BETA"),
+                ") si basa su diversi fattori con un range da 2 a 7.",
+                color_scheme="gray",
+                size="2",
+            ),
+            width="100%",
+            align="center",
+            spacing="2",
+        ),
+        width="100%",
+    )

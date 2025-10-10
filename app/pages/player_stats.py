@@ -101,8 +101,8 @@ def advice_button(advice, index) -> rx.Component:
     )
 
 
-def render_rating(attribute, icon):
-    val = PlayerState.ratings[attribute]
+def render_rating(ratings, attribute, icon):
+    val = ratings[attribute]
     return rx.vstack(
         rx.hstack(
             rx.icon(icon),
@@ -177,12 +177,16 @@ def team_page() -> rx.Component:
                         padding="0.2em 0.5em",
                         border_radius="0.5em",
                     ),
-                    render_rating("Servizio", "arrow-up-from-line"),
-                    render_rating("Risposta", "arrow-down-from-line"),
-                    render_rating("Agilità", "rabbit"),
-                    render_rating("Attacco", "swords"),
-                    render_rating("Difesa", "shield-ban"),
-                    render_rating("Consistenza", "brick-wall"),
+                    render_rating(
+                        PlayerState.ratings, "Servizio", "arrow-up-from-line"
+                    ),
+                    render_rating(
+                        PlayerState.ratings, "Risposta", "arrow-down-from-line"
+                    ),
+                    render_rating(PlayerState.ratings, "Agilità", "rabbit"),
+                    render_rating(PlayerState.ratings, "Attacco", "swords"),
+                    render_rating(PlayerState.ratings, "Difesa", "shield-ban"),
+                    render_rating(PlayerState.ratings, "Consistenza", "brick-wall"),
                     width="100%",
                     wrap="wrap",
                     justify_content="space-evenly",

@@ -21,6 +21,7 @@ class UploadState(State):
     info_not_found: bool = False
     loading_info: bool = False
     original_url: str = ""
+    pbv_id: str = ""
     video_id: str = ""
     uploaded: bool = False
     uploading: bool = False
@@ -33,6 +34,8 @@ class UploadState(State):
     unknowns: list[bool] = []
     location_type: str = ""
     location_name: str = ""
+    avatar_ids: list[int] = []
+    match_score: list = []
 
     @rx.event
     def on_load(self):
@@ -61,12 +64,13 @@ class UploadState(State):
         self.info_found = False
         self.loading_info = True
         yield
-        self.original_url = form_data.get("url")
+        self.original_url = form_data.get("url") or ""
         if not (m := search(r"share\/(\w+)(\?rf)?", self.original_url)):
             self.info_not_found = True
             self.loading_info = False
             return
         pb_id = m.group(1)
+        self.pbv_id = pb_id
         response = post(API_VIDEO_ID, json={"vid": pb_id}).json()
         self.video_id = response.get("mux", {}).get("playbackId")
         stats_json = get(f"{API_JSON}/{pb_id}/141/0/stats.json").json()
@@ -83,6 +87,10 @@ class UploadState(State):
         dump(data, open(path.join(base_client_dir, "stats.json"), "w+"))
         data = {"code": self.code, "pbvision-id": pb_id} | insights_json
         dump(data, open(path.join(base_client_dir, "insights.json"), "w+"))
+        self.avatar_ids = [
+            data.get("avatar_id", -1) for data in insights_json.get("player_data")
+        ]
+        self.match_score = stats_json.get("game", {}).get("game_outcome", [0, 0])
         self.loading_info = False
         self.info_found = True
 
@@ -114,9 +122,14 @@ class UploadState(State):
                 upload_data = await file.read()
                 if "stats" in file.name:
                     data = {"code": self.code} | loads(upload_data)
+                    self.pbv_id = data.get("session", {}).get("vid", "")
                     self.players_n = data.get("session", {}).get("num_players", 4)
+                    self.match_score = data.get("game", {}).get("game_outcome", [0, 0])
                 if "insights" in file.name:
                     data = {"code": self.code} | loads(upload_data)
+                    self.avatar_ids = [
+                        pl.get("avatar_id", -1) for pl in data.get("player_data")
+                    ]
                 dump(data, open(filepath, "w+"))
             self.uploaded = True
             self.phase = "info"
@@ -237,3 +250,8 @@ class UploadState(State):
             self.location_name = ""
             return rx.toast.success("Location aggiunto!")
         return rx.toast.error("Errore durante l'aggiunta della location")
+
+    @rx.var
+    def player_image_url(self) -> str:
+        google_url = "https://storage.googleapis.com/pbv-pro"
+        return f"{google_url}/{self.pbv_id}/141/player"

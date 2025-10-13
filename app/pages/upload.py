@@ -23,38 +23,55 @@ def files_badge(file) -> rx.Component:
 
 
 def player_selection(player_n):
-    return rx.hstack(
-        rx.cond(
-            UploadState.unknowns[player_n - 1],
-            rx.select(
-                ["Sconosciuto"],
-                value="Sconosciuto",
-                disabled=True,
-                **field_style | {"width": "88%"},
+    return rx.vstack(
+        rx.hstack(
+            rx.cond(
+                UploadState.unknowns[player_n - 1],
+                rx.select(
+                    ["Sconosciuto"],
+                    value="Sconosciuto",
+                    disabled=True,
+                    **field_style | {"width": "88%"},
+                ),
+                player_select(
+                    UploadState,
+                    f"Giocatore {player_n}",
+                    field_style | {"width": "88%"},
+                    field_style | {"width": "88%"},
+                ),
             ),
-            player_select(
-                UploadState,
-                f"Giocatore {player_n}",
-                field_style | {"width": "88%"},
-                field_style | {"width": "88%"},
+            rx.cond(
+                UploadState.unknowns[player_n - 1],
+                btn_icon(
+                    "user-search",
+                    on_click=lambda: UploadState.toggle_player(player_n - 1),
+                    type="button",
+                    variant="soft",
+                ),
+                btn_icon(
+                    "user-x",
+                    on_click=lambda: UploadState.toggle_player(player_n - 1),
+                    type="button",
+                    variant="soft",
+                ),
             ),
+            align="center",
+            width="100%",
         ),
-        rx.cond(
-            UploadState.unknowns[player_n - 1],
-            btn_icon(
-                "user-search",
-                on_click=lambda: UploadState.toggle_player(player_n - 1),
-                type="button",
-                variant="soft",
+        rx.hstack(
+            rx.foreach(
+                range(8),
+                lambda index: rx.image(
+                    src=f"{UploadState.player_image_url}{UploadState.avatar_ids[player_n-1]}-{index}.jpg",
+                    width="40px",
+                    height="auto",
+                    border_radius="1em",
+                ),
             ),
-            btn_icon(
-                "user-x",
-                on_click=lambda: UploadState.toggle_player(player_n - 1),
-                type="button",
-                variant="soft",
-            ),
+            width="100%",
+            align="stretch",
+            wrap="wrap",
         ),
-        align="center",
         width="100%",
     )
 
@@ -502,6 +519,8 @@ def form_name() -> rx.Component:
                                 "Squadra 1",
                                 rx.vstack(
                                     player_selection(1),
+                                    rx.spacer(),
+                                    rx.spacer(),
                                     rx.cond(
                                         UploadState.players_n == 4, player_selection(2)
                                     ),
@@ -514,6 +533,8 @@ def form_name() -> rx.Component:
                                 "Squadra 2",
                                 rx.vstack(
                                     player_selection(3),
+                                    rx.spacer(),
+                                    rx.spacer(),
                                     rx.cond(
                                         UploadState.players_n == 4, player_selection(4)
                                     ),
@@ -541,7 +562,16 @@ def form_name() -> rx.Component:
                                     name="score2",
                                     **field_style,
                                 ),
+                                rx.callout(
+                                    f"Il punteggio rilevato è "
+                                    f"{UploadState.match_score[0]}"
+                                    f" a {UploadState.match_score[1]}",
+                                    icon="info",
+                                    color_scheme="gray",
+                                    width="100%",
+                                ),
                                 width="100%",
+                                align="center",
                             ),
                         ),
                         btn_text_icon(

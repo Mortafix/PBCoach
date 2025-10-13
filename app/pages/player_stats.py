@@ -160,51 +160,54 @@ def team_page() -> rx.Component:
                 overflow="auto",
             ),
         ),
-        card(
-            rx.vstack(
-                rx.hstack(
-                    rx.vstack(
-                        rx.text("Generale", color_scheme="amber", opacity=0.65),
-                        rx.text(
-                            PlayerState.ratings["Generale"],
-                            size="8",
-                            color_scheme="amber",
+        rx.cond(
+            PlayerState.ratings,
+            card(
+                rx.vstack(
+                    rx.hstack(
+                        rx.vstack(
+                            rx.text("Generale", color_scheme="amber", opacity=0.65),
+                            rx.text(
+                                PlayerState.ratings["Generale"],
+                                size="8",
+                                color_scheme="amber",
+                            ),
+                            spacing="0",
+                            justify="center",
+                            align="center",
+                            bg=rx.color("amber", 3),
+                            padding="0.2em 0.5em",
+                            border_radius="0.5em",
                         ),
-                        spacing="0",
-                        justify="center",
-                        align="center",
-                        bg=rx.color("amber", 3),
-                        padding="0.2em 0.5em",
-                        border_radius="0.5em",
+                        render_rating(
+                            PlayerState.ratings, "Servizio", "arrow-up-from-line"
+                        ),
+                        render_rating(
+                            PlayerState.ratings, "Risposta", "arrow-down-from-line"
+                        ),
+                        render_rating(PlayerState.ratings, "Agilità", "rabbit"),
+                        render_rating(PlayerState.ratings, "Attacco", "swords"),
+                        render_rating(PlayerState.ratings, "Difesa", "shield-ban"),
+                        render_rating(PlayerState.ratings, "Consistenza", "brick-wall"),
+                        width="100%",
+                        wrap="wrap",
+                        justify_content="space-evenly",
                     ),
-                    render_rating(
-                        PlayerState.ratings, "Servizio", "arrow-up-from-line"
+                    rx.spacer(),
+                    rx.spacer(),
+                    rx.text(
+                        "Il sistema di rating (in versione ",
+                        rx.code("BETA"),
+                        ") si basa su diversi fattori con un range da 2 a 7.",
+                        color_scheme="gray",
+                        size="2",
                     ),
-                    render_rating(
-                        PlayerState.ratings, "Risposta", "arrow-down-from-line"
-                    ),
-                    render_rating(PlayerState.ratings, "Agilità", "rabbit"),
-                    render_rating(PlayerState.ratings, "Attacco", "swords"),
-                    render_rating(PlayerState.ratings, "Difesa", "shield-ban"),
-                    render_rating(PlayerState.ratings, "Consistenza", "brick-wall"),
                     width="100%",
-                    wrap="wrap",
-                    justify_content="space-evenly",
-                ),
-                rx.spacer(),
-                rx.spacer(),
-                rx.text(
-                    "Il sistema di rating (in versione ",
-                    rx.code("BETA"),
-                    ") si basa su diversi fattori con un range da 2 a 7.",
-                    color_scheme="gray",
-                    size="2",
+                    align="center",
+                    spacing="2",
                 ),
                 width="100%",
-                align="center",
-                spacing="2",
             ),
-            width="100%",
         ),
         card(
             rx.hstack(

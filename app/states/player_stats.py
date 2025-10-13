@@ -156,6 +156,7 @@ class PlayerState(OverviewState):
         player_insights = self.match_insights.get("player_data")[player_id]
         self.avatar_id = player_insights.get("avatar_id", -1)
         # player ranking
+        self.ratings = dict()
         if ratings_data := player_insights.get("trends", {}).get("ratings"):
             self.ratings = calculate_ratings(ratings_data)
         # player stats
